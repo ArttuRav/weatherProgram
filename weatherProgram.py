@@ -6,7 +6,7 @@ import tkinter as tk
 import requests, json
 from tkinter import END, ttk
 from datetime import datetime
-from threading import Thread
+import re
 
 class WeatherProgram(tk.Tk):
 
@@ -21,13 +21,20 @@ class WeatherProgram(tk.Tk):
 
         self.canvas1 = tk.Canvas(self, bg='white', height=400, width=300).place(x='10', y='100')
 
-        self.tempLabel = tk.Label(self, text='Temperature:', font=('lucida', 12), background='white').place(x='15', y='100')
         self.dateLabel = tk.Label(self, text=self.getDate(), font=('lucida', 10), background='lightblue')
         self.timeLabel = tk.Label(self, text=self.getTime(), font=('lucida', 10), background='lightblue')
         self.dateLabel.place(x='15', y='5')
         self.timeLabel.place(x='100', y='5')
 
-        self.newThreadTime = Thread(target=self.update).start()
+        self.tempTextLabel = tk.Label(self, text='Temperature', font=('lucida sans', 12), background='white').place(x='15', y='100')
+        self.feelsTextLabel = tk.Label(self, text='Feels like', font=('lucida sans', 12), background='white').place(x='15', y='125')
+
+        self.cityName = 'Helsinki'
+
+        self.temperatureLabel = tk.Label(self, background='white', text=self.displayInfo(0), font=('lucida sans', 12))
+        self.feelsLikeLabel = tk.Label(self, background='white', text=self.displayInfo(1), font=('lucida sans', 12))
+
+        # self.newThreadTime = Thread(target=self.update).start()
 
         self.entryCity = ttk.Entry(
             self,
@@ -37,13 +44,7 @@ class WeatherProgram(tk.Tk):
         self.searchButton = ttk.Button(
             self,
             text='Search',
-            command=lambda:[self.getCity()])
-
-        # Creating label
-        self.temperature = ttk.Label(
-            self,
-            text=lambda:self.displayInfo('0'),
-            font = (40))
+            command=lambda:[self.getCity(), self.placeInfo()]) # NEEDS FIXING
 
         self.entryCity.insert(0, 'Enter a city...') # Adding a default value to be displayed
         self.entryCity.bind('<Button-1>', self.clearEntryDefault) # Removing the default value when clicked
@@ -64,9 +65,13 @@ class WeatherProgram(tk.Tk):
         return self.cityName
 
     def displayInfo(self, index):
-        self.infoList = WeatherInfo.jsonToString(self)
+        infoList = WeatherInfo.jsonToString(self)
+        
+        toCelcius = round(self.infoList[index] - 273.15), 3
+        toCelcius = re.sub('[()]', '', str(toCelcius))
+        toString = str(toCelcius) + ' C'
 
-        return self.infoList[index]
+        return toString
 
     def getDate(self):
         now = datetime.now()
@@ -83,6 +88,13 @@ class WeatherProgram(tk.Tk):
 
         self.after(1000, self.update)
 
+    def placeInfo(self):
+        # self.temperatureLabel.config(text = self.displayInfo(0))
+        # self.feelsLikeLabel.config(text = self.displayInfo(1))
+        self.temperatureLabel.place(x='125', y='100')
+        self.feelsLikeLabel.place(x='125', y='125')
+
+
 class WeatherInfo():
 
     def __init__(self):
@@ -94,7 +106,7 @@ class WeatherInfo():
         self.apiKey = '936b51d488d6f3918dcaee06b7c69a9f'
         self.baseURL = 'http://api.openweathermap.org/data/2.5/weather?q='
 
-        self.completeURL = self.baseURL + WeatherProgram.getCity(self) + '&APPID=' + self.apiKey
+        self.completeURL = self.baseURL + self.cityName + '&APPID=' + self.apiKey
         self.response = requests.get(self.completeURL)
         self.data = self.response.json()
 
