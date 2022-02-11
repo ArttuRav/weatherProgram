@@ -31,10 +31,8 @@ class WeatherProgram(tk.Tk):
 
         self.cityName = 'Helsinki'
 
-        self.temperatureLabel = tk.Label(self, background='white', text=self.displayInfo(0), font=('lucida sans', 12))
-        self.feelsLikeLabel = tk.Label(self, background='white', text=self.displayInfo(1), font=('lucida sans', 12))
-
-        # self.newThreadTime = Thread(target=self.update).start()
+        self.temperatureLabel = tk.Label(self, background='white', text=self.getData(0), font=('lucida sans', 12))
+        self.feelsLikeLabel = tk.Label(self, background='white', text=self.getData(1), font=('lucida sans', 12))
 
         self.entryCity = ttk.Entry(
             self,
@@ -44,7 +42,7 @@ class WeatherProgram(tk.Tk):
         self.searchButton = ttk.Button(
             self,
             text='Search',
-            command=lambda:[self.getCity(), self.placeInfo()]) # NEEDS FIXING
+            command=lambda:[self.getCity(), self.placeData(), self.updateLabels()])
 
         self.entryCity.insert(0, 'Enter a city...') # Adding a default value to be displayed
         self.entryCity.bind('<Button-1>', self.clearEntryDefault) # Removing the default value when clicked
@@ -62,16 +60,19 @@ class WeatherProgram(tk.Tk):
     def getCity(self):
         self.cityName = str(self.entryCity.get())
 
-        return self.cityName
+        if len(self.cityName) == 0:
+            print('No city entered.')
+        else:
+            return self.cityName
 
-    def displayInfo(self, index):
+    def getData(self, index):
         infoList = WeatherInfo.jsonToString(self)
         
-        toCelcius = round(self.infoList[index] - 273.15), 3
+        toCelcius = round(infoList[index] - 273.15), 3
         toCelcius = re.sub('[()]', '', str(toCelcius))
-        toString = str(toCelcius) + ' C'
+        celciusToString = str(toCelcius) + ' C'
 
-        return toString
+        return celciusToString
 
     def getDate(self):
         now = datetime.now()
@@ -88,9 +89,11 @@ class WeatherProgram(tk.Tk):
 
         self.after(1000, self.update)
 
-    def placeInfo(self):
-        # self.temperatureLabel.config(text = self.displayInfo(0))
-        # self.feelsLikeLabel.config(text = self.displayInfo(1))
+    def updateLabels(self):
+        self.temperatureLabel.config(text=self.getData(0))
+        self.feelsLikeLabel.config(text=self.getData(0))
+
+    def placeData(self):
         self.temperatureLabel.place(x='125', y='100')
         self.feelsLikeLabel.place(x='125', y='125')
 
