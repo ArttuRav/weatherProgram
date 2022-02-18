@@ -58,10 +58,13 @@ class WeatherProgram(tk.Tk):
         self.cityName = self.getCity()
 
         if len(self.cityName) == 0 or (self.entryCity.get() == 'Enter a city...'):
+            self.cityNotFoundLabel.config(text=' ')
+            self.cityNotFoundLabel.lower()
             self.placeNoCityEnteredLabel()
             print('Error: no city entered.')
         if (CurrentForecast.isValidCity(self) == True and (self.entryCity.get() != 'Enter a city...')):
-            self.cityNotEnteredLabel.config(text='')
+            self.cityNotEnteredLabel.config(text=' ')
+            self.cityNotEnteredLabel.lower()
             self.placeCityNotFoundLabel()
             print('City not found.')
         else:
