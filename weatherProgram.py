@@ -3,9 +3,8 @@
 # Description: 
 
 import tkinter as tk
-from turtle import update
 import requests
-from tkinter import END, PhotoImage, ttk
+from tkinter import ttk
 from datetime import datetime
 from PIL import Image, ImageTk
 import re
