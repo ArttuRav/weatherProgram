@@ -139,13 +139,14 @@ class WeatherProgram(tk.Tk):
     # Placing 'no city entered' error label
     def placeNoCityEnteredLabel(self):
         self.cityNotFoundLabel.config(text='') # Clearing 'city not found' error
-        self.cityNotFoundLabel.lower()
+        self.cityNotFoundLabel.lower() # Lowering the 'city not found' label to avoid clipping
         self.cityNotEnteredLabel.config(text='No city entered')
         self.cityNotEnteredLabel.place(x='240', y='5')
 
     # Placing 'city not found' error label
     def placeCityNotFoundLabel(self):
         self.cityNotEnteredLabel.config(text='') # Clearing 'city not entered' error
+        self.cityNotEnteredLabel.lower() # Lowering the 'city not entered' label to avoid clipping
         self.cityNotFoundLabel.config(text='City not found')
         self.cityNotFoundLabel.place(x='240', y='5')
 
