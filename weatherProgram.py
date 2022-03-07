@@ -164,7 +164,7 @@ class CurrentForecast():
         self.mainwin = mainwin
 
     def getCurrentForecast(self):
-        if (self.isValidCity(self) == False): # Checking that the city entered has data
+        if (CurrentForecast.isValidCity(self) == True): # Checking that the city entered has data
             self.main = self.data['main']
             weather = self.data['weather']
 
