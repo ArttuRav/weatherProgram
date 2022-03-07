@@ -104,16 +104,13 @@ class WeatherProgram(tk.Tk):
     # Getter for data
     def getData(self, index):
         infoList = CurrentForecast.getCurrentForecast(self)
-        
-        try:
-            if (infoList is not None):
-                toCelcius = round(infoList[index]), 3
-                toCelcius = re.sub('[()]', '', str(toCelcius))
-                celciusToString = toCelcius + ' C'
 
-                return celciusToString
-        except:
-            print('An error occured.')
+        if (infoList is not None):
+            toCelcius = round(infoList[index]), 3
+            toCelcius = re.sub('[()]', '', str(toCelcius))
+            celciusToString = toCelcius + ' C'
+
+            return celciusToString
 
     def getDate(self):
         now = datetime.now()
@@ -142,6 +139,7 @@ class WeatherProgram(tk.Tk):
     # Placing 'no city entered' error label
     def placeNoCityEnteredLabel(self):
         self.cityNotFoundLabel.config(text='') # Clearing 'city not found' error
+        self.cityNotFoundLabel.lower()
         self.cityNotEnteredLabel.config(text='No city entered')
         self.cityNotEnteredLabel.place(x='240', y='5')
 
