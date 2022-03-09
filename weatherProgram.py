@@ -15,9 +15,6 @@ class WeatherProgram(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        # API key
-        # self.apiKey = '936b51d488d6f3918dcaee06b7c69a9f'
-
         # Creating window
         self.title('Weather program')
         self.resizable(0, 0)
@@ -37,12 +34,20 @@ class WeatherProgram(tk.Tk):
         self.timeLabel = tk.Label(self, text=self.getTime(), font=('lucida', 10), background='lightblue')
 
         # Data text labels
-        self.tempTextLabel = tk.Label(self, text='Temperature', font=('lucida', 12), background='white').place(x='15', y='100')
-        self.feelsTextLabel = tk.Label(self, text='Feels like', font=('lucida', 12), background='white').place(x='15', y='125')
+        self.tempTextLabel = tk.Label(self, text='temperature', font=('lucida', 12), background='white').place(x='15', y='100')
+        self.feelsTextLabel = tk.Label(self, text='feels like', font=('lucida', 12), background='white').place(x='15', y='125')
+        self.pressureTextLabel = tk.Label(self, text='pressure', font=('lucida', 12), background='white').place(x='15', y='150')
+        self.humidityTextLabel = tk.Label(self, text='humidity', font=('lucida', 12), background='white').place(x='15', y='175')
+        self.visibilityTextLabel = tk.Label(self, text='visibility', font=('lucida', 12), background='white').place(x='15', y='200')
+        self.descriptionTextLabel = tk.Label(self, text='description', font=('lucida', 12), background='white').place(x='15', y='225')
 
         # Data labels
         self.temperatureLabel = tk.Label(self, background='white', text='', font=('lucida', 12))
         self.feelsLikeLabel = tk.Label(self, background='white', text='', font=('lucida', 12))
+        self.pressureLabel = tk.Label(self, background='white', text='', font=('lucida', 12))
+        self.humidityLabel = tk.Label(self, background='white', text='', font=('lucida', 12))
+        self.visibilityLabel = tk.Label(self, background='white', text='', font=('lucida', 12))
+        self.descriptionLabel = tk.Label(self, background='white', text='', font=('lucida', 12))
 
         # Search bar entry
         self.entryCity = ttk.Entry(self, width='24', font=('lucida 13'))
@@ -50,13 +55,15 @@ class WeatherProgram(tk.Tk):
         self.entryCity.bind('<Button-1>', self.clearEntryDefault) # Removing the default value when clicked
 
         # Icon for updating data
-        imagePath = os.path.abspath(r"C:/Users/arttu/OneDrive - Turun ammattikorkeakoulu/Python/OOP_project/Images/refreshIcon.png")
-        refreshIconImage = Image.open(imagePath)
+        cwd = os.getcwd()
+        imagePath = "\Images\\refreshIcon.png"
+        imagePathComplete = cwd + imagePath
+        refreshIconImage = Image.open(imagePathComplete)
         refreshIcon = ImageTk.PhotoImage(refreshIconImage)
 
         # Search and refresh buttons
-        self.searchButton = ttk.Button(self, text='Search', command=lambda:self.checkInput())
-        self.refreshButton = tk.Button(self, image=refreshIcon, background='lightblue', borderwidth=0, width=20, height=20) # Button for updating data
+        self.searchButton = ttk.Button(self, text='Search', command=self.checkInput)
+        self.refreshButton = tk.Button(self, image=refreshIcon, background='lightblue', borderwidth=0, width=20, height=20, command=self.updateLabels)
         self.refreshButton.image = refreshIcon # Creating a reference to the image
 
         # Placements
@@ -66,7 +73,7 @@ class WeatherProgram(tk.Tk):
         self.dateLabel.place(x='15', y='5')
         self.timeLabel.place(x='100', y='5')
 
-        self.update()
+        self.updateDateTime()
 
     # Checking input to show user errors when needed
     def checkInput(self):
@@ -103,14 +110,29 @@ class WeatherProgram(tk.Tk):
 
     # Getter for data
     def getData(self, index):
-        infoList = CurrentForecast.getCurrentForecast(self)
+        dataDict = CurrentForecast.getCurrentForecast(self)
 
-        if (infoList is not None):
-            toCelcius = round(infoList[index]), 3
-            toCelcius = re.sub('[()]', '', str(toCelcius))
-            celciusToString = toCelcius + ' C'
+        if (dataDict is not None):
+            dictToList = list(dataDict.values())[index]
+            if (type(dictToList) != str):
+                toRounded = round(dictToList), 3
+                toRounded = re.sub('[()]', '', str(toRounded))
 
-            return celciusToString
+                if (list(dataDict)[index] == 'temp' or list(dataDict)[index] == 'ftemp'):
+                    roundedCelcius = toRounded + u'\N{DEGREE SIGN}C'
+
+                    return roundedCelcius
+                else:
+                    return toRounded
+            else:
+                return dictToList
+
+    # Function to update date and time
+    def updateDateTime(self):
+        self.timeLabel.config(text=self.getTime())
+        self.dateLabel.config(text=self.getDate())
+
+        self.after(1000, self.updateDateTime)
 
     def getDate(self):
         now = datetime.now()
@@ -122,19 +144,23 @@ class WeatherProgram(tk.Tk):
 
         return now.strftime('%H:%M')
 
-    def update(self):
-        self.timeLabel.config(text=self.getTime())
-
-        self.after(1000, self.update)
-
     # Setting data to labels
     def updateLabels(self):
         self.temperatureLabel.config(text=self.getData(0))
         self.feelsLikeLabel.config(text=self.getData(1))
+        self.pressureLabel.config(text=self.getData(2))
+        self.humidityLabel.config(text=self.getData(3))
+        self.visibilityLabel.config(text=self.getData(4))
+        self.descriptionLabel.config(text=self.getData(5))
 
+    # Placing data
     def placeData(self):
         self.temperatureLabel.place(x='125', y='100')
         self.feelsLikeLabel.place(x='125', y='125')
+        self.pressureLabel.place(x='125', y='150')
+        self.humidityLabel.place(x='125', y='175')
+        self.visibilityLabel.place(x='125', y='200')
+        self.descriptionLabel.place(x='125', y='225')
 
     # Placing 'no city entered' error label
     def placeNoCityEnteredLabel(self):
@@ -154,6 +180,10 @@ class WeatherProgram(tk.Tk):
     def clearDataLabels(self):
         self.temperatureLabel.config(text='')
         self.feelsLikeLabel.config(text='')
+        self.pressureLabel.config(text='')
+        self.humidityLabel.config(text='')
+        self.visibilityLabel.config(text='')
+        self.descriptionLabel.config(text='')
 
 
 class CurrentForecast():
@@ -173,9 +203,9 @@ class CurrentForecast():
             visibility = self.data['visibility']
             description = weather[0]['description']
 
-            infoList = [temperature, feelsTemp, pressure, humidity, visibility, description]
+            dataDict = {'temp': temperature, 'ftemp':feelsTemp, 'pres':pressure, 'humid':humidity, 'visib':visibility, 'desc':description}
 
-            return infoList
+            return dataDict
         else:
             print('Error: city not found')
 
@@ -189,6 +219,7 @@ class CurrentForecast():
         response = requests.get(self.completeURL)
         self.data = response.json()
         
+        # Checking that the city entered exists in the database
         if (self.data['cod'] == '404'):
             return False
         else:
