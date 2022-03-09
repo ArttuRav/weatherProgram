@@ -112,18 +112,18 @@ class WeatherProgram(tk.Tk):
     def getData(self, index):
         dataDict = CurrentForecast.getCurrentForecast(self)
 
-        if (dataDict is not None):
+        if (dataDict is not None): # Checking that the dictionary exists
             dictToList = list(dataDict.values())[index]
-            if (type(dictToList) != str):
+            if (type(dictToList) != str): # Checking type of value to only round values that are not type(str)
                 toRounded = round(dictToList), 3
                 toRounded = re.sub('[()]', '', str(toRounded))
 
-                if (list(dataDict)[index] == 'temp' or list(dataDict)[index] == 'ftemp'):
-                    roundedCelcius = toRounded + u'\N{DEGREE SIGN}C'
+                if (((list(dataDict)[index]) == 'temp') or ((list(dataDict)[index]) == 'ftemp')):
+                    roundedCelcius = toRounded + u'\N{DEGREE SIGN}C' # Adding the degree sign and C to temperature based values
 
                     return roundedCelcius
                 else:
-                    return toRounded
+                    return toRounded 
             else:
                 return dictToList
 
@@ -155,12 +155,12 @@ class WeatherProgram(tk.Tk):
 
     # Placing data
     def placeData(self):
-        self.temperatureLabel.place(x='125', y='100')
-        self.feelsLikeLabel.place(x='125', y='125')
-        self.pressureLabel.place(x='125', y='150')
-        self.humidityLabel.place(x='125', y='175')
-        self.visibilityLabel.place(x='125', y='200')
-        self.descriptionLabel.place(x='125', y='225')
+        self.temperatureLabel.place(x='190', y='100')
+        self.feelsLikeLabel.place(x='190', y='125')
+        self.pressureLabel.place(x='190', y='150')
+        self.humidityLabel.place(x='190', y='175')
+        self.visibilityLabel.place(x='190', y='200')
+        self.descriptionLabel.place(x='190', y='225')
 
     # Placing 'no city entered' error label
     def placeNoCityEnteredLabel(self):
@@ -224,6 +224,7 @@ class CurrentForecast():
             return False
         else:
             return True
+
 
 
 if __name__ == '__main__':
