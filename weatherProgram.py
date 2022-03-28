@@ -211,7 +211,7 @@ class CurrentForecast():
 
     def isValidCity(self):
         # API information
-        self.apiKey = '936b51d488d6f3918dcaee06b7c69a9f'
+        self.apiKey = 'YOUR API KEY'
         self.baseURL = 'http://api.openweathermap.org/data/2.5/weather?q='
 
         self.city = WeatherProgram.getCity(self)
