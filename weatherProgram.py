@@ -11,6 +11,7 @@ import re
 import os
 import timeit
 import config
+import collections
 
 class WeatherProgram(tk.Tk):
 
@@ -108,9 +109,9 @@ class WeatherProgram(tk.Tk):
 
     # Getter for city
     def getCity(self):
-        self.cityName = self.entryCity.get()
+        cityName = self.entryCity.get()
 
-        return self.cityName
+        return cityName
 
     # Getter for data
     def getData(self, index):
@@ -138,7 +139,7 @@ class WeatherProgram(tk.Tk):
             else:
                 return dictToList
 
-    # Function to update date and time
+    # Updating date and time
     def updateDateTime(self):
         self.timeLabel.config(text=self.getTime())
         self.dateLabel.config(text=self.getDate())
@@ -208,9 +209,6 @@ class WeatherProgram(tk.Tk):
 
 class CurrentForecast():
 
-    def __init__(self, mainwin):
-        self.mainwin = mainwin
-
     def getCurrentForecast(self):
         if (CurrentForecast.isValidCity(self) == True): # Checking that the city entered has data
             self.main = self.data['main']
@@ -235,13 +233,11 @@ class CurrentForecast():
             print('Error: city not in database.')
 
     def isValidCity(self):
-        # API information
-        self.apiKey = str(config.apiKey)
-        self.baseURL = 'http://api.openweathermap.org/data/2.5/weather?q='
+        baseURL = 'http://api.openweathermap.org/data/2.5/weather?q='
 
-        self.city = WeatherProgram.getCity(self)
-        self.completeURL = self.baseURL + self.city + '&units=metric' + '&APPID=' + self.apiKey
-        response = requests.get(self.completeURL)
+        city = WeatherProgram.getCity(self)
+        completeURL = baseURL + city + '&units=metric' + '&APPID=' + config.apiKey
+        response = requests.get(completeURL)
         self.data = response.json()
         
         # Checking that the city entered exists in the database
@@ -249,6 +245,43 @@ class CurrentForecast():
             return False
         else:
             return True
+
+
+class SevenDayForecast(CurrentForecast):
+
+    def getDailyForecast(self):
+        location = geoLocation.getLatitudeLongitude(self)
+        lat = location.lat
+        lon = location.lon
+
+        onecallBaseURL = 'http://api.openweathermap.org/data/2.5/onecall?'
+        completeUrlDaily = onecallBaseURL + 'lat=' + lat + '&lon=' + lon + '&exclude=current,minutely,hourly,alerts' + '&appid=' + config.apiKey
+        print(completeUrlDaily)
+
+        dailyResponse = requests.get(completeUrlDaily)
+        dailyData = dailyResponse.json()
+        print(dailyData)
+
+
+class geoLocation():
+    
+    # Using an API to get latitude and longitude for given city
+    def getLatitudeLongitude(self):
+        geoBaseURL = 'http://api.openweathermap.org/geo/1.0/direct?q='
+        city = WeatherProgram.getCity(self)
+        geoCompleteURL = geoBaseURL + city + '&APPID=' + config.apiKey
+
+        geoResponse = requests.get(geoCompleteURL)
+        geoData = geoResponse.json()
+
+        lat = str(geoData[0]['lat'])
+        lon = str(geoData[0]['lon'])
+
+        locTuple = collections.namedtuple('returns', ['lat', 'lon'])
+        location = locTuple(lat, lon)
+
+        return location
+
 
 
 if __name__ == '__main__':
