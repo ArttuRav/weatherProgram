@@ -3,6 +3,8 @@
 # Description: 
 
 import tkinter as tk
+from tkinter import Canvas
+from tkinter.font import BOLD
 import requests
 from tkinter import ttk
 from datetime import datetime
@@ -22,39 +24,41 @@ class WeatherProgram(tk.Tk):
         self.title('Weather program')
         self.resizable(0, 0)
         self.geometry('700x515')
-        self['bg'] = 'lightblue'
+        self['bg'] = 'gray'
 
         # Labels for error messages
-        self.cityNotEnteredLabel = tk.Label(self, text='', font=('lucida', 10), background='lightblue')
-        self.cityNotFoundLabel = tk.Label(self, text='', font=('lucida', 10), background='lightblue')
+        self.cityNotEnteredLabel = tk.Label(self, text='', font=('lucida', 10), background='gray')
+        self.cityNotFoundLabel = tk.Label(self, text='', font=('lucida', 10), background='gray')
 
         # Canvases for visuals
-        self.canvasLeft = tk.Canvas(self, bg='white', height=400, width=300).place(x='10', y='100')
-        self.canvasRight = tk.Canvas(self, bg='white', height=400, width=340).place(x='345', y='100')
+        self.canvasLeft = tk.Canvas(self, bg='lightgray', highlightthickness=1, highlightbackground='black', height=400, width=675)
+        self.canvasLeft.place(x='10', y='100')
+        # self.canvasRight = tk.Canvas(self, bg='white', height=400, width=340).place(x='345', y='100')
+        self.canvasLeft.create_line(337.5,0,337.5,401, fill='gray', width=5)
 
         # Labels for date and time
-        self.dateLabel = tk.Label(self, text=self.getDate(), font=('lucida', 10), background='lightblue')
-        self.timeLabel = tk.Label(self, text=self.getTime(), font=('lucida', 10), background='lightblue')
+        self.dateLabel = tk.Label(self, text=self.getDate(), font=('lucida', 10), background='gray')
+        self.timeLabel = tk.Label(self, text=self.getTime(), font=('lucida', 10), background='gray')
 
         # Data text labels
-        self.tempTextLabel = tk.Label(self, text='Temperature', font=('calibri', 12), background='white').place(x='15', y='100')
-        self.feelsTextLabel = tk.Label(self, text='Feels like', font=('calibri', 12), background='white').place(x='15', y='125')
-        self.pressureTextLabel = tk.Label(self, text='Pressure', font=('calibri', 12), background='white').place(x='15', y='150')
-        self.humidityTextLabel = tk.Label(self, text='Humidity', font=('calibri', 12), background='white').place(x='15', y='175')
-        self.visibilityTextLabel = tk.Label(self, text='Visibility', font=('calibri', 12), background='white').place(x='15', y='200')
-        self.descriptionTextLabel = tk.Label(self, text='Description', font=('calibri', 12), background='white').place(x='15', y='225')
-        self.descriptionTextLabel = tk.Label(self, text='Wind speed', font=('calibri', 12), background='white').place(x='15', y='250')
+        self.tempTextLabel = tk.Label(self, text='TEMPERATURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='105')
+        self.feelsTextLabel = tk.Label(self, text='FEELS LIKE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='130')
+        self.pressureTextLabel = tk.Label(self, text='PRESSURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='155')
+        self.humidityTextLabel = tk.Label(self, text='HUMIDITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='180')
+        self.visibilityTextLabel = tk.Label(self, text='VISIBILITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='205')
+        self.descriptionTextLabel = tk.Label(self, text='DESCRIPTION', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='230')
+        self.descriptionTextLabel = tk.Label(self, text='WIND SPEED', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='255')
 
-        self.cityNameLabel = tk.Label(self, text='', font=('calibri', 12), background='lightblue')
+        self.cityNameLabel = tk.Label(self, text='', font=('calibri', 12), background='gray')
 
         # Data labels
-        self.curTempLabel = tk.Label(self, background='white', text='', font=('calibri', 12))
-        self.feelsLikeLabel = tk.Label(self, background='white', text='', font=('calibri', 12))
-        self.pressureLabel = tk.Label(self, background='white', text='', font=('calibri', 12))
-        self.humidityLabel = tk.Label(self, background='white', text='', font=('calibri', 12))
-        self.visibilityLabel = tk.Label(self, background='white', text='', font=('calibri', 12))
-        self.descriptionLabel = tk.Label(self, background='white', text='', font=('calibri', 12))
-        self.windSpeedLabel = tk.Label(self, background='white', text='', font=('calibri', 12))
+        self.curTempLabel = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.feelsLikeLabel = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.pressureLabel = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.humidityLabel = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.visibilityLabel = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.descriptionLabel = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.windSpeedLabel = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
 
         # Search bar entry
         self.entryCity = ttk.Entry(self, width='24', font=('lucida 13'))
@@ -70,7 +74,7 @@ class WeatherProgram(tk.Tk):
 
         # Search and refresh buttons
         self.searchButton = ttk.Button(self, text='Search', command=self.checkInput)
-        self.refreshButton = tk.Button(self, image=refreshIcon, background='lightblue', borderwidth=0, width=20, height=20, command=lambda:self.updateLabels())
+        self.refreshButton = tk.Button(self, image=refreshIcon, background='gray', borderwidth=0, width=20, height=20, command=lambda:self.updateLabels())
         self.refreshButton.image = refreshIcon # Creating a reference to the image
 
         # Placements that can't / shouldn't be done while declaring
@@ -96,13 +100,16 @@ class WeatherProgram(tk.Tk):
             self.clearDataLabels()
 
         # Checking if the entered city exists in the database
-        elif ((CurrentForecast.isValidCity(self) == False) and (self.entryCity.get() != 'Enter a city...')):
+        elif ((CurrentForecast.ValidCityCurrent(self) == False) and (self.entryCity.get() != 'Enter a city...')):
             print('Error: city not found')
             self.placeCityNotFoundLabel()
             self.clearDataLabels()
 
         # Placing data and clearing errors
         else:
+            # Making sure cityNameLabel has a valid value
+            if ((len(self.cityNameLabel.cget('text')) != 0) and (CurrentForecast.ValidCityCurrent(self) == True)):
+                self.cityName = self.cityNameLabel.cget('text') # Giving city name label value from search bar if a valid city is found
             self.updateLabels()
             self.placeData()
 
@@ -114,13 +121,9 @@ class WeatherProgram(tk.Tk):
     # Getter for city
     def getCity(self):
         # print('getCity')
-        cityName = self.entryCity.get()
+        self.cityName = self.entryCity.get()
 
-        # Making sure cityNameLabel has a value
-        if (len(self.cityNameLabel.cget('text')) != 0):
-            cityName = self.cityNameLabel.cget('text')
-
-        return cityName
+        return self.cityName
 
     # Getter for data
     def getData(self, index):
@@ -186,13 +189,13 @@ class WeatherProgram(tk.Tk):
         self.cityNameLabel.place(x='15', y='70')
         self.clearEntryDefault(self)
 
-        self.curTempLabel.place(x='200', y='100')
-        self.feelsLikeLabel.place(x='200', y='125')
-        self.pressureLabel.place(x='200', y='150')
-        self.humidityLabel.place(x='200', y='175')
-        self.visibilityLabel.place(x='200', y='200')
-        self.descriptionLabel.place(x='200', y='225')
-        self.windSpeedLabel.place(x='200', y='250')
+        self.curTempLabel.place(x='203', y='105')
+        self.feelsLikeLabel.place(x='203', y='130')
+        self.pressureLabel.place(x='203', y='155')
+        self.humidityLabel.place(x='203', y='180')
+        self.visibilityLabel.place(x='203', y='205')
+        self.descriptionLabel.place(x='203', y='230')
+        self.windSpeedLabel.place(x='203', y='255')
 
         # Clearing possible error messages
         self.cityNotFoundLabel.config(text='') 
@@ -220,18 +223,20 @@ class WeatherProgram(tk.Tk):
     # Clearing data labels if city does not exist or one is not entered
     def clearDataLabels(self):
         # print('clearDataLabels')
+        self.cityNameLabel.config(text='')
         self.curTempLabel.config(text='')
         self.feelsLikeLabel.config(text='')
         self.pressureLabel.config(text='')
         self.humidityLabel.config(text='')
         self.visibilityLabel.config(text='')
         self.descriptionLabel.config(text='')
+        self.windSpeedLabel.config(text='')
 
 
 class CurrentForecast():
 
     def getCurrentForecast(self):
-        if (CurrentForecast.isValidCity(self) == True): # Checking that the city entered has data
+        if (CurrentForecast.ValidCityCurrent(self) == True): # Checking that the city entered has data
             main = self.currentData['main']
             weather = self.currentData['weather']
 
@@ -253,7 +258,7 @@ class CurrentForecast():
         else:
             print('Error: city not in database.')
 
-    def isValidCity(self):
+    def ValidCityCurrent(self):
         baseURL = 'http://api.openweathermap.org/data/2.5/weather?q='
 
         city = WeatherProgram.getCity(self)
@@ -271,6 +276,9 @@ class CurrentForecast():
 class SevenDayForecast(CurrentForecast):
 
     def getDailyForecast(self):
+        pass
+
+    def validCityDaily(self):
         cityCoordinates = geoLocation.getLatitudeLongitude(self)
         lat = cityCoordinates.lat
         lon = cityCoordinates.lon
@@ -285,9 +293,6 @@ class SevenDayForecast(CurrentForecast):
             return True
         else:
             return False
-
-    def validCityDaily(self):
-        pass
 
 
 class geoLocation():
