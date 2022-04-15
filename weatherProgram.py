@@ -30,11 +30,10 @@ class WeatherProgram(tk.Tk):
         self.cityNotEnteredLabel = tk.Label(self, text='', font=('lucida', 10), background='gray')
         self.cityNotFoundLabel = tk.Label(self, text='', font=('lucida', 10), background='gray')
 
-        # Canvases for visuals
-        self.canvasLeft = tk.Canvas(self, bg='lightgray', highlightthickness=1, highlightbackground='black', height=400, width=675)
-        self.canvasLeft.place(x='10', y='100')
-        # self.canvasRight = tk.Canvas(self, bg='white', height=400, width=340).place(x='345', y='100')
-        self.canvasLeft.create_line(337.5,0,337.5,401, fill='gray', width=5)
+        # Canvas for visuals
+        self.canvas = tk.Canvas(self, bg='lightgray', highlightthickness=1, highlightbackground='black', height=400, width=675)
+        self.canvas.place(x='10', y='100')
+        self.canvas.create_line(337.5,0,337.5,401, fill='gray', width=5) # Creating a line for visuals
 
         # Labels for date and time
         self.dateLabel = tk.Label(self, text=self.getDate(), font=('lucida', 10), background='gray')
@@ -49,6 +48,7 @@ class WeatherProgram(tk.Tk):
         self.descriptionTextLabel = tk.Label(self, text='DESCRIPTION', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='230')
         self.descriptionTextLabel = tk.Label(self, text='WIND SPEED', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='255')
 
+        # Label for city name
         self.cityNameLabel = tk.Label(self, text='', font=('calibri', 12), background='gray')
 
         # Data labels
@@ -61,9 +61,9 @@ class WeatherProgram(tk.Tk):
         self.windSpeedLabel = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
 
         # Search bar entry
-        self.entryCity = ttk.Entry(self, width='24', font=('lucida 13'))
-        self.entryCity.insert(0, 'Enter a city...') # Adding a default value to be displayed
-        self.entryCity.bind('<Button-1>', self.clearEntryDefault) # Removing the default value when clicked
+        self.searchBarEntry = ttk.Entry(self, width='24', font=('lucida 13'))
+        self.searchBarEntry.insert(0, 'Enter a city...') # Adding a default value to be displayed
+        self.searchBarEntry.bind('<Button-1>', self.clearEntryDefault) # Removing the default value when clicked
 
         # Icon for updating data
         cwd = os.getcwd()
@@ -74,16 +74,17 @@ class WeatherProgram(tk.Tk):
 
         # Search and refresh buttons
         self.searchButton = ttk.Button(self, text='Search', command=self.checkInput)
-        self.refreshButton = tk.Button(self, image=refreshIcon, background='gray', borderwidth=0, width=20, height=20, command=lambda:self.updateLabels())
+        self.refreshButton = tk.Button(self, image=refreshIcon, background='gray', borderwidth=0, width=20, height=20, command=self.updateLabels)
         self.refreshButton.image = refreshIcon # Creating a reference to the image
 
         # Placements that can't / shouldn't be done while declaring
-        self.entryCity.place(x='15', y='40')
+        self.searchBarEntry.place(x='15', y='40')
         self.searchButton.place(x='240', y='40')
         self.refreshButton.place(x='295', y='73')
         self.dateLabel.place(x='15', y='5')
         self.timeLabel.place(x='100', y='5')
 
+        # Calling an update function to keep time and date updated
         self.updateDateTime()
 
     # Checking input to show user errors when needed
@@ -94,36 +95,33 @@ class WeatherProgram(tk.Tk):
         self.cityName = self.getCity()
 
         # Checking if a city is entered
-        if ((len(self.cityName) == 0) or (self.entryCity.get() == 'Enter a city...')):
+        if ((len(self.cityName) == 0) or (self.searchBarEntry.get() == 'Enter a city...')):
             print('Error: no city entered')
             self.placeNoCityEnteredLabel()
             self.clearDataLabels()
 
         # Checking if the entered city exists in the database
-        elif ((CurrentForecast.ValidCityCurrent(self) == False) and (self.entryCity.get() != 'Enter a city...')):
+        elif (CurrentForecast.ValidCityCurrent(self) == False):
             print('Error: city not found')
             self.placeCityNotFoundLabel()
             self.clearDataLabels()
 
         # Placing data and clearing errors
         else:
-            # Making sure cityNameLabel has a valid value
-            if ((len(self.cityNameLabel.cget('text')) != 0) and (CurrentForecast.ValidCityCurrent(self) == True)):
-                self.cityName = self.cityNameLabel.cget('text') # Giving city name label value from search bar if a valid city is found
             self.updateLabels()
             self.placeData()
 
     # Function for clearing entry when clicked
     def clearEntryDefault(self, event):
         # print('clearEntryDefault')
-        self.entryCity.delete(0, 'end')
+        self.searchBarEntry.delete(0, 'end')
 
     # Getter for city
     def getCity(self):
         # print('getCity')
-        self.cityName = self.entryCity.get()
+        self.cityName = self.searchBarEntry.get()
 
-        return self.cityName
+        return self.cityName.capitalize()
 
     # Getter for data
     def getData(self, index):
