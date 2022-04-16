@@ -31,25 +31,26 @@ class WeatherProgram(tk.Tk):
         self.cityNotFoundLabel = tk.Label(self, text='', font=('lucida', 10), background='gray')
 
         # Canvas for visuals
-        self.canvas = tk.Canvas(self, bg='lightgray', highlightthickness=1, highlightbackground='black', height=400, width=675)
-        self.canvas.place(x='10', y='100')
-        self.canvas.create_line(337.5,0,337.5,401, fill='gray', width=5) # Creating a line for visuals
+        self.canvasTimeDate = tk.Canvas(self, bg='gray', height=22, width=125, highlightthickness=1, highlightbackground='black').place(x='12', y='4')
+        self.canvasData = tk.Canvas(self, bg='lightgray', highlightthickness=1, highlightbackground='black', height=400, width=675)
+        self.canvasData.place(x='10', y='100')
+        self.canvasData.create_line(303,0,303,401, fill='gray', width=5) # Creating a line for visuals
 
         # Labels for date and time
         self.dateLabel = tk.Label(self, text=self.getDate(), font=('lucida', 10), background='gray')
         self.timeLabel = tk.Label(self, text=self.getTime(), font=('lucida', 10), background='gray')
 
         # Data text labels
-        self.tempTextLabel = tk.Label(self, text='TEMPERATURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='105')
-        self.feelsTextLabel = tk.Label(self, text='FEELS LIKE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='130')
-        self.pressureTextLabel = tk.Label(self, text='PRESSURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='155')
-        self.humidityTextLabel = tk.Label(self, text='HUMIDITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='180')
-        self.visibilityTextLabel = tk.Label(self, text='VISIBILITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='205')
-        self.descriptionTextLabel = tk.Label(self, text='DESCRIPTION', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='230')
-        self.descriptionTextLabel = tk.Label(self, text='WIND SPEED', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='255')
+        self.tempTextLabel = tk.Label(self, text='TEMPERATURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='155')
+        self.feelsTextLabel = tk.Label(self, text='FEELS LIKE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='180')
+        self.pressureTextLabel = tk.Label(self, text='PRESSURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='205')
+        self.humidityTextLabel = tk.Label(self, text='HUMIDITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='230')
+        self.visibilityTextLabel = tk.Label(self, text='VISIBILITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='255')
+        self.descriptionTextLabel = tk.Label(self, text='DESCRIPTION', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='280')
+        self.descriptionTextLabel = tk.Label(self, text='WIND SPEED', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='305')
 
         # Label for city name
-        self.cityNameLabel = tk.Label(self, text='', font=('calibri', 12), background='gray')
+        self.cityNameLabel = tk.Label(self, text='', font=('calibri', 14), background='gray')
 
         # Data labels
         self.curTempLabel = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -67,10 +68,14 @@ class WeatherProgram(tk.Tk):
 
         # Icon for updating data
         cwd = os.getcwd()
-        imagePath = "\Images\\refreshIcon.png"
-        imagePathComplete = cwd + imagePath
-        refreshIconImage = Image.open(imagePathComplete)
+        refreshImgPath = "/Images/refreshIcon.png"
+        refreshImgPathFull = cwd + refreshImgPath
+        refreshIconImage = Image.open(refreshImgPathFull)
         refreshIcon = ImageTk.PhotoImage(refreshIconImage)
+
+        # Icon for description
+        descImgPathBase = "/Images"
+        descImgPathFull = "/" + ''
 
         # Search and refresh buttons
         self.searchButton = ttk.Button(self, text='Search', command=self.checkInput)
@@ -120,6 +125,12 @@ class WeatherProgram(tk.Tk):
     def getCity(self):
         # print('getCity')
         self.cityName = self.searchBarEntry.get()
+
+        # Making sure cityName gets a value and using console print to note error
+        if (len(self.searchBarEntry.get()) == 0):
+            self.cityName = self.cityNameLabel.cget("text")
+            if (len(self.cityNameLabel.cget("text")) == 0):
+                print('Error: no city stored.')
 
         return self.cityName.capitalize()
 
@@ -184,16 +195,16 @@ class WeatherProgram(tk.Tk):
     # Placing data
     def placeData(self):
         # print('placeData')
-        self.cityNameLabel.place(x='15', y='70')
+        self.cityNameLabel.place(x='125', y='70')
         self.clearEntryDefault(self)
 
-        self.curTempLabel.place(x='203', y='105')
-        self.feelsLikeLabel.place(x='203', y='130')
-        self.pressureLabel.place(x='203', y='155')
-        self.humidityLabel.place(x='203', y='180')
-        self.visibilityLabel.place(x='203', y='205')
-        self.descriptionLabel.place(x='203', y='230')
-        self.windSpeedLabel.place(x='203', y='255')
+        self.curTempLabel.place(x='240', y='155')
+        self.feelsLikeLabel.place(x='240', y='180')
+        self.pressureLabel.place(x='240', y='205')
+        self.humidityLabel.place(x='240', y='230')
+        self.visibilityLabel.place(x='240', y='255')
+        self.descriptionLabel.place(x='203', y='280')
+        self.windSpeedLabel.place(x='240', y='305')
 
         # Clearing possible error messages
         self.cityNotFoundLabel.config(text='') 
