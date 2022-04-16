@@ -3,7 +3,6 @@
 # Description: 
 
 import tkinter as tk
-from tkinter import Canvas
 from tkinter.font import BOLD
 import requests
 from tkinter import ttk
@@ -35,7 +34,6 @@ class WeatherProgram(tk.Tk):
         # Canvas for visuals
         self.canvas_time_date = tk.Canvas(self, bg='gray', height=22, width=125, highlightthickness=1, highlightbackground='black').place(x='12', y='4')
         self.canvas_data = tk.Canvas(self, bg='lightgray', highlightthickness=1, highlightbackground='black', height=400, width=675)
-        self.canvas_data.place(x='10', y='100')
         self.canvas_data.create_line(303,0,303,401, fill='gray', width=5) # Creating a line for visuals
 
         # Labels for date and time
@@ -43,13 +41,13 @@ class WeatherProgram(tk.Tk):
         self.time_label = tk.Label(self, text=self.get_time(), font=('lucida', 10), background='gray')
 
         # Data text labels
-        self.temp_text_label = tk.Label(self, text='TEMPERATURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='155')
-        self.feels_text_label = tk.Label(self, text='FEELS LIKE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='180')
-        self.pressure_text_label = tk.Label(self, text='PRESSURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='205')
-        self.humidity_text_label = tk.Label(self, text='HUMIDITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='230')
-        self.visibility_text_label = tk.Label(self, text='VISIBILITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='255')
-        self.description_text_label = tk.Label(self, text='DESCRIPTION', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='280')
-        self.wind_text_label = tk.Label(self, text='WIND SPEED', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='305')
+        self.description_text_label = tk.Label(self, text='DESCRIPTION', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='120')
+        self.temp_text_label = tk.Label(self, text='TEMPERATURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='175')
+        self.feels_text_label = tk.Label(self, text='FEELS LIKE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='200')
+        self.pressure_text_label = tk.Label(self, text='PRESSURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='225')
+        self.humidity_text_label = tk.Label(self, text='HUMIDITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='250')
+        self.visibility_text_label = tk.Label(self, text='VISIBILITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='275')
+        self.wind_text_label = tk.Label(self, text='WIND SPEED', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='300')
 
         # Label to store city name
         self.city_name_label = tk.Label(self, text='', font=('calibri', 14), background='gray')
@@ -70,14 +68,12 @@ class WeatherProgram(tk.Tk):
 
         # Icon for updating data
         cwd = os.getcwd()
-        refresh_img_path = "/Images/refreshIcon.png"
-        refresh_img_path_full = cwd + refresh_img_path
-        refresh_icon_image = Image.open(refresh_img_path_full)
-        refresh_icon = ImageTk.PhotoImage(refresh_icon_image)
+        refresh_img_path_base = "\\Images\\refreshIcon.png"
+        refresh_img_path_full = cwd + refresh_img_path_base
+        refresh_icon = ImageTk.PhotoImage(Image.open(refresh_img_path_full))
 
         # Icon for description
-        descImgPathBase = "/Images"
-        descImgPathFull = "/" + ''
+        self.desc_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
 
         # Search and refresh buttons
         self.search_button = ttk.Button(self, text='Search', command=self.check_input)
@@ -90,6 +86,7 @@ class WeatherProgram(tk.Tk):
         self.refresh_button.place(x='295', y='73')
         self.date_label.place(x='15', y='5')
         self.time_label.place(x='100', y='5')
+        self.canvas_data.place(x='10', y='100')
 
         # Calling an update function to keep time and date updated
         self.update_date_time()
@@ -142,9 +139,9 @@ class WeatherProgram(tk.Tk):
         current_data_dict = CurrentForecast.get_current_forecast(self)
 
         if (current_data_dict is not None): # Checking that the dictionary exists
-            dict_to_list = list(current_data_dict.values())[index]
-            if (type(dict_to_list) != str): # Checking type of value to only round values that are not type(str)
-                to_rounded = round((dict_to_list), 2)
+            data_list = list(current_data_dict.values())[index]
+            if (type(data_list) != str): # Checking type of value to only round values that are not type(str)
+                to_rounded = round((data_list), 2)
                 to_rounded = re.sub('[()]', '', str(to_rounded))
 
                 # Adding approriate units to data output
@@ -157,12 +154,12 @@ class WeatherProgram(tk.Tk):
                     return to_rounded + ' %'
                 elif ((list(current_data_dict)[index]) == 'visibility'):
                     return to_rounded + ' m'
-                elif ((list(current_data_dict)[index] == 'windSpeed')):
+                elif ((list(current_data_dict)[index] == 'windspeed')):
                     return to_rounded + ' m/s'
                 else:
-                    return to_rounded 
+                    return to_rounded
             else:
-                return dict_to_list
+                return data_list
 
     # Updating date and time
     def update_date_time(self):
@@ -185,6 +182,7 @@ class WeatherProgram(tk.Tk):
     def update_labels(self):
         # print('updateLabels')
         self.city_name_label.config(text=self.get_city())
+        self.desc_icon_label.config(image=self.get_desc_icons())
 
         self.cur_temp_label.config(text=self.get_data(0))
         self.feels_like_label.config(text=self.get_data(1))
@@ -198,15 +196,16 @@ class WeatherProgram(tk.Tk):
     def place_data(self):
         # print('placeData')
         self.city_name_label.place(x='125', y='70')
+        self.desc_icon_label.place(x='250', y='111')
+        self.description_label.place(x='125', y='118')
         self.clear_entry_default(self)
 
-        self.cur_temp_label.place(x='240', y='155')
-        self.feels_like_label.place(x='240', y='180')
-        self.pressure_label.place(x='240', y='205')
-        self.humidity_label.place(x='240', y='230')
-        self.visibility_label.place(x='240', y='255')
-        self.description_label.place(x='203', y='280')
-        self.wind_speed_label.place(x='240', y='305')
+        self.cur_temp_label.place(x='240', y='175')
+        self.feels_like_label.place(x='240', y='200')
+        self.pressure_label.place(x='240', y='225')
+        self.humidity_label.place(x='240', y='250')
+        self.visibility_label.place(x='240', y='275')
+        self.wind_speed_label.place(x='240', y='300')
 
         # Clearing possible error messages
         self.city_not_found_label.config(text='') 
@@ -243,6 +242,27 @@ class WeatherProgram(tk.Tk):
         self.description_label.config(text='')
         self.wind_speed_label.config(text='')
 
+    def get_desc_icons(self):
+        current_data_dict = CurrentForecast.get_current_forecast(self)
+        dict_to_list = list(current_data_dict.values())
+
+        if (dict_to_list[7] is not None):
+            cwd = os.getcwd() + '\\'
+            current_desc_icon_file = dict_to_list[7] + '.png'
+            src_path = cwd + current_desc_icon_file
+            dest_path = cwd + 'Images\\' + current_desc_icon_file
+            print(dest_path)
+            final_icon_url = 'http://openweathermap.org/img/wn/' + dict_to_list[7] + '@2x.png'
+            urllib.request.urlretrieve(final_icon_url, current_desc_icon_file)
+            shutil.move(src_path, dest_path)
+
+            desc_icon_img = Image.open(dest_path)
+            desc_icon_img_resized = desc_icon_img.resize((45, 45), Image.ANTIALIAS)
+            desc_icon_img_final = ImageTk.PhotoImage(desc_icon_img_resized)
+            self.desc_icon_label.image = desc_icon_img_final
+
+            return desc_icon_img_final
+
 
 class CurrentForecast():
 
@@ -259,11 +279,12 @@ class CurrentForecast():
             wind = self.current_data['wind']
             wind_speed = wind['speed']
             description = weather[0]['description']
+            description_icon = weather[0]['icon']
 
             # Using a dictionary to store and return the data. This is done to be able to match keys for data formatting.
             current_data_dict = {'temp': cur_temp, 'ftemp':feels_temp, 'pressure':pressure, \
                         'humidity':humidity, 'visibility':visibility, 'description':description, \
-                        'windSpeed':wind_speed}
+                        'windspeed':wind_speed, 'icon':description_icon}
 
             return current_data_dict
         else:
@@ -284,12 +305,9 @@ class CurrentForecast():
             return False
 
 
-class SevenDayForecast(CurrentForecast):
+class SevenDayForecast():
 
     def get_daily_forecast(self):
-        pass
-
-    def valid_city_daily(self):
         city_coordinates = GeoLocation.get_latitude_longitude(self)
         lat = city_coordinates.lat
         lon = city_coordinates.lon
@@ -300,6 +318,9 @@ class SevenDayForecast(CurrentForecast):
         daily_response = requests.get(dailyCompleteUrl)
         self.daily_data = daily_response.json()
 
+        return self.daily_data
+
+    def valid_city_daily(self):
         if (self.daily_data['cod'] == 200):
             return True
         else:
@@ -325,23 +346,33 @@ class GeoLocation():
 
         return location
 
-class DescriptionIcons:
+class DescriptionIconsDaily(SevenDayForecast):
     
-    def icon_placeholder(self, index):
-        icon_base_url = 'http://openweathermap.org/img/wn/'
+    def get_and_move_icon(self):
+        daily_data_placeholder = SevenDayForecast.get_daily_forecast(self)
 
-        var_daily_data = self.dailyData['daily']
-        weather = var_daily_data[index]['weather']
-        icon_code = weather[0]['icon']
-        icon_file_name = icon_code + '.png'
-        icon_complete_url = icon_base_url + icon_code + '@2x.png'
+        icon_base_url = 'http://openweathermap.org/img/wn/'
+        cwd = os.getcwd() + '\\'
+
+        daily_icon_list = []
+
+        for i in range(8):
+            var_daily_data = daily_data_placeholder['daily']
+            weather = var_daily_data[i]['weather']
+            icon_code = weather[0]['icon']
+            icon_file_name = icon_code + '.png'
+            icon_complete_url = icon_base_url + icon_code + '@2x.png'
+
+            daily_icon_list.append(icon_code)
 
         urllib.request.urlretrieve(icon_complete_url, icon_file_name)
-        cwd = os.getcwd() + '\\'
+        
         src_path = cwd + icon_file_name
         dest_path = cwd + 'Images\\' + icon_file_name
 
-        shutil.move(src_path, dest_path) # Moving the file to destPath
+        shutil.move(src_path, dest_path) # Moving the file to dest_path
+
+        return daily_icon_list
         
 
 
