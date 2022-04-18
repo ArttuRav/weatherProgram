@@ -110,6 +110,8 @@ class WeatherProgram(tk.Tk):
 
     # Checking input to show user errors when needed
     def check_input(self):
+        SevenDayForecast.data_of_weekday(self, 2) # Temporary. To Run functions that aren't attached to anything else yet.
+
         self.start = timeit.default_timer()
 
         self.city_name = self.get_city()
@@ -325,17 +327,14 @@ class CurrentForecast():
                         'windspeed':wind_speed, 'winddeg':wind_deg, 'icon':description_icon}
 
             return current_data_dict
-        else:
-            pass
-            # print('Error: city not in database.')
 
     def valid_city_current(self):
         current_base_url = 'http://api.openweathermap.org/data/2.5/weather?q='
 
         city = WeatherProgram.get_city(self)
         current_complete_url = current_base_url + city + '&units=metric' + '&APPID=' + config.api_key
-        response = requests.get(current_complete_url)
-        self.current_data = response.json()
+        current_response = requests.get(current_complete_url)
+        self.current_data = current_response.json()
 
         # Checking that the city entered exists in the database
         if (self.current_data['cod'] == 200):
@@ -347,6 +346,12 @@ class CurrentForecast():
 class SevenDayForecast():
 
     def get_daily_forecast(self):
+        if (SevenDayForecast.valid_city_daily(self) == True):
+            self.daily = self.daily_data['daily']
+
+            return self.daily
+
+    def valid_city_daily(self):
         city_coordinates = GeoLocation.get_latitude_longitude(self)
         lat = city_coordinates.lat
         lon = city_coordinates.lon
@@ -357,13 +362,29 @@ class SevenDayForecast():
         daily_response = requests.get(dailyCompleteUrl)
         self.daily_data = daily_response.json()
 
-        return self.daily_data
-
-    def valid_city_daily(self):
-        if (self.daily_data['cod'] == 200):
+        if (self.daily_data['daily'] is not None):
             return True
         else:
             return False
+
+    def weekday_from_timestamp(self, index):
+        self.daily = SevenDayForecast.get_daily_forecast(self)
+
+        timestamp_date = self.daily[index]['dt']
+        year = int(datetime.utcfromtimestamp(timestamp_date).strftime('%Y'))
+        month = int(datetime.utcfromtimestamp(timestamp_date).strftime('%m'))
+        day = int(datetime.utcfromtimestamp(timestamp_date).strftime('%d'))
+            
+        date = datetime(year, month, day)
+        weekday = date.weekday()
+        
+        return weekday
+    
+    # Getting data of given week day number (0-6), starting from Monday
+    def data_of_weekday(self, index):
+        weekday = SevenDayForecast.weekday_from_timestamp(self, index)
+
+        print(self.daily[weekday])
 
 
 class GeoLocation():
