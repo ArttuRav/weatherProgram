@@ -367,6 +367,7 @@ class SevenDayForecast():
         else:
             return False
 
+    # Getting an integer corresponding to a day of the week from timestamp format
     def weekday_from_timestamp(self, index):
         self.daily = SevenDayForecast.get_daily_forecast(self)
 
@@ -409,6 +410,7 @@ class GeoLocation():
 
 class DescriptionIconsDaily(SevenDayForecast):
     
+    # Function to get icons for an image description of the weather
     def get_and_move_icon(self):
         daily_data_placeholder = SevenDayForecast.get_daily_forecast(self)
 
