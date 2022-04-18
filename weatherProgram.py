@@ -2,6 +2,7 @@
 # Author: Arttu Ravantti 
 # Description: 
 
+from pprint import pprint
 import tkinter as tk
 from tkinter.font import BOLD
 import requests
@@ -11,10 +12,13 @@ from PIL import Image, ImageTk
 import re
 import os
 import timeit
+
+from sympy import true
 import config
 import collections
 import urllib.request
 import shutil
+import json
 
 class WeatherProgram(tk.Tk):
 
@@ -34,20 +38,26 @@ class WeatherProgram(tk.Tk):
         # Canvas for visuals
         self.canvas_time_date = tk.Canvas(self, bg='gray', height=22, width=125, highlightthickness=1, highlightbackground='black').place(x='12', y='4')
         self.canvas_data = tk.Canvas(self, bg='lightgray', highlightthickness=1, highlightbackground='black', height=400, width=675)
-        self.canvas_data.create_line(303,0,303,401, fill='gray', width=5) # Creating a line for visuals
+        # Lines for visuals
+        self.canvas_data.create_line(260,0,260,401, fill='gray', width=5) # vertical separator
+        self.canvas_data.create_line(0,72,260,72, fill='gray', width=5) # horizontal current data
 
         # Labels for date and time
         self.date_label = tk.Label(self, text=self.get_date(), font=('lucida', 10), background='gray')
         self.time_label = tk.Label(self, text=self.get_time(), font=('lucida', 10), background='gray')
 
-        # Data text labels
-        self.description_text_label = tk.Label(self, text='DESCRIPTION', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='120')
-        self.temp_text_label = tk.Label(self, text='TEMPERATURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='175')
-        self.feels_text_label = tk.Label(self, text='FEELS LIKE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='200')
-        self.pressure_text_label = tk.Label(self, text='PRESSURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='225')
-        self.humidity_text_label = tk.Label(self, text='HUMIDITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='250')
-        self.visibility_text_label = tk.Label(self, text='VISIBILITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='275')
-        self.wind_text_label = tk.Label(self, text='WIND SPEED', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='300')
+        # Text labels
+        self.description_text_label = tk.Label(self, text='DESCRIPTION', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='110')
+        self.temp_text_label = tk.Label(self, text='TEMPERATURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='180')
+        self.feels_text_label = tk.Label(self, text='FEELS LIKE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='205')
+        self.pressure_text_label = tk.Label(self, text='PRESSURE', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='230')
+        self.humidity_text_label = tk.Label(self, text='HUMIDITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='255')
+        self.visibility_text_label = tk.Label(self, text='VISIBILITY', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='280')
+        self.windS_text_label = tk.Label(self, text='WIND SPEED', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='305')
+        self.windD_text_label = tk.Label(self, text='WIND DIRECTION', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='330')
+
+        self.day_label_monday = tk.Label(self, text='Mon', font=('calibri', 11, BOLD), background='lightgray').place(x='290', y='105')
+        self.day_label_tuesday = tk.Label(self, text='Tue', font=('calibri', 11, BOLD), background='lightgray').place(x='340', y='105')
 
         # Label to store city name
         self.city_name_label = tk.Label(self, text='', font=('calibri', 14), background='gray')
@@ -60,9 +70,10 @@ class WeatherProgram(tk.Tk):
         self.visibility_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.description_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.wind_speed_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
 
-        # Search bar entry
-        self.search_bar_entry = ttk.Entry(self, width='24', font=('lucida 13'))
+        # Search bar
+        self.search_bar_entry = ttk.Entry(self, width='20', font=('lucida 13'))
         self.search_bar_entry.insert(0, 'Enter a city...') # Adding a default value to be displayed
         self.search_bar_entry.bind('<Button-1>', self.clear_entry_default) # Removing the default value when clicked
 
@@ -82,8 +93,8 @@ class WeatherProgram(tk.Tk):
 
         # Placements that can't / shouldn't be done while declaring
         self.search_bar_entry.place(x='15', y='40')
-        self.search_button.place(x='240', y='40')
-        self.refresh_button.place(x='295', y='73')
+        self.search_button.place(x='205', y='40')
+        self.refresh_button.place(x='260', y='73')
         self.date_label.place(x='15', y='5')
         self.time_label.place(x='100', y='5')
         self.canvas_data.place(x='10', y='100')
@@ -93,7 +104,6 @@ class WeatherProgram(tk.Tk):
 
     # Checking input to show user errors when needed
     def check_input(self):
-        # print('checkInput')
         self.start = timeit.default_timer()
 
         self.city_name = self.get_city()
@@ -117,12 +127,10 @@ class WeatherProgram(tk.Tk):
 
     # Function for clearing entry when clicked
     def clear_entry_default(self, event):
-        # print('clearEntryDefault')
         self.search_bar_entry.delete(0, 'end')
 
     # Getter for city
     def get_city(self):
-        # print('getCity')
         self.city_name = self.search_bar_entry.get()
 
         # Making sure cityName gets a value and using console print to note error
@@ -135,13 +143,13 @@ class WeatherProgram(tk.Tk):
 
     # Getter for data
     def get_data(self, index):
-        # print('getData')
         current_data_dict = CurrentForecast.get_current_forecast(self)
+        current_data_dict_list = list(current_data_dict.values())
 
         if (current_data_dict is not None): # Checking that the dictionary exists
-            data_list = list(current_data_dict.values())[index]
-            if (type(data_list) != str): # Checking type of value to only round values that are not type(str)
-                to_rounded = round((data_list), 2)
+            data_value = list(current_data_dict.values())[index]
+            if (type(data_value) != str): # Checking type of value to only round values that are not type(str)
+                to_rounded = round((data_value), 2)
                 to_rounded = re.sub('[()]', '', str(to_rounded))
 
                 # Adding approriate units to data output
@@ -156,10 +164,12 @@ class WeatherProgram(tk.Tk):
                     return to_rounded + ' m'
                 elif ((list(current_data_dict)[index] == 'windspeed')):
                     return to_rounded + ' m/s'
+                elif ((list(current_data_dict)[index] == 'winddeg')):
+                    return self.get_direction_from_degree(current_data_dict_list[7])
                 else:
                     return to_rounded
             else:
-                return data_list
+                return data_value
 
     # Updating date and time
     def update_date_time(self):
@@ -168,19 +178,27 @@ class WeatherProgram(tk.Tk):
 
         self.after(1000, self.update_date_time)
 
+    # Method name
     def get_date(self):
         now = datetime.now()
 
         return now.strftime('%B %d')
 
+    # Method name
     def get_time(self):
         now = datetime.now()
 
         return now.strftime('%H:%M')
 
+    # Method name
+    def get_direction_from_degree(self, angle):
+        val = int((angle / 22.5) + 0.5)
+        dir_array = ['N','NNE','NE','ENE','E','ESE', 'SE', 'SSE','S','SSW','SW','WSW','W','WNW','NW','NNW']
+
+        return dir_array[(val % 16)]
+
     # Setting data to labels
     def update_labels(self):
-        # print('updateLabels')
         self.city_name_label.config(text=self.get_city())
         self.desc_icon_label.config(image=self.get_desc_icons())
 
@@ -191,21 +209,22 @@ class WeatherProgram(tk.Tk):
         self.visibility_label.config(text=self.get_data(4))
         self.description_label.config(text=self.get_data(5))
         self.wind_speed_label.config(text=self.get_data(6))
+        self.wind_deg_label.config(text=self.get_data(7))
 
     # Placing data
     def place_data(self):
-        # print('placeData')
         self.city_name_label.place(x='125', y='70')
-        self.desc_icon_label.place(x='250', y='111')
-        self.description_label.place(x='125', y='118')
+        self.desc_icon_label.place(x='190', y='111')
+        self.description_label.place(x='18', y='135')
         self.clear_entry_default(self)
 
-        self.cur_temp_label.place(x='240', y='175')
-        self.feels_like_label.place(x='240', y='200')
-        self.pressure_label.place(x='240', y='225')
-        self.humidity_label.place(x='240', y='250')
-        self.visibility_label.place(x='240', y='275')
-        self.wind_speed_label.place(x='240', y='300')
+        self.cur_temp_label.place(x='190', y='180')
+        self.feels_like_label.place(x='190', y='205')
+        self.pressure_label.place(x='190', y='230')
+        self.humidity_label.place(x='190', y='255')
+        self.visibility_label.place(x='190', y='280')
+        self.wind_speed_label.place(x='190', y='305')
+        self.wind_deg_label.place(x='190', y='330')
 
         # Clearing possible error messages
         self.city_not_found_label.config(text='') 
@@ -216,7 +235,6 @@ class WeatherProgram(tk.Tk):
 
     # Placing 'no city entered' error label
     def place_no_city_entered_label(self):
-        # print('placeNoCityEnteredLabel')
         self.city_not_found_label.config(text='') # Clearing 'city not found' error
         self.city_not_found_label.lower() # Lowering the 'city not found' label to avoid clipping
         self.city_not_entered_label.config(text='No city entered')
@@ -224,7 +242,6 @@ class WeatherProgram(tk.Tk):
 
     # Placing 'city not found' error label
     def place_city_not_found_label(self):
-        # print('placeCityNotFoundLabel')
         self.city_not_entered_label.config(text='') # Clearing 'city not entered' error
         self.city_not_entered_label.lower() # Lowering the 'city not entered' label to avoid clipping
         self.city_not_found_label.config(text='City not found')
@@ -232,7 +249,6 @@ class WeatherProgram(tk.Tk):
 
     # Clearing data labels if city does not exist or one is not entered
     def clear_data_labels(self):
-        # print('clearDataLabels')
         self.city_name_label.config(text='')
         self.cur_temp_label.config(text='')
         self.feels_like_label.config(text='')
@@ -241,18 +257,18 @@ class WeatherProgram(tk.Tk):
         self.visibility_label.config(text='')
         self.description_label.config(text='')
         self.wind_speed_label.config(text='')
+        self.wind_deg_label.config(text='')
 
     def get_desc_icons(self):
         current_data_dict = CurrentForecast.get_current_forecast(self)
         dict_to_list = list(current_data_dict.values())
 
-        if (dict_to_list[7] is not None):
+        if (dict_to_list[8] is not None):
             cwd = os.getcwd() + '\\'
-            current_desc_icon_file = dict_to_list[7] + '.png'
+            current_desc_icon_file = dict_to_list[8] + '.png'
             src_path = cwd + current_desc_icon_file
             dest_path = cwd + 'Images\\' + current_desc_icon_file
-            print(dest_path)
-            final_icon_url = 'http://openweathermap.org/img/wn/' + dict_to_list[7] + '@2x.png'
+            final_icon_url = 'http://openweathermap.org/img/wn/' + dict_to_list[8] + '@2x.png'
             urllib.request.urlretrieve(final_icon_url, current_desc_icon_file)
             shutil.move(src_path, dest_path)
 
@@ -278,13 +294,14 @@ class CurrentForecast():
             visibility = self.current_data['visibility']
             wind = self.current_data['wind']
             wind_speed = wind['speed']
+            wind_deg = wind['deg']
             description = weather[0]['description']
             description_icon = weather[0]['icon']
 
             # Using a dictionary to store and return the data. This is done to be able to match keys for data formatting.
             current_data_dict = {'temp': cur_temp, 'ftemp':feels_temp, 'pressure':pressure, \
                         'humidity':humidity, 'visibility':visibility, 'description':description, \
-                        'windspeed':wind_speed, 'icon':description_icon}
+                        'windspeed':wind_speed, 'winddeg':wind_deg, 'icon':description_icon}
 
             return current_data_dict
         else:
@@ -345,6 +362,7 @@ class GeoLocation():
         location = location_tuple(lat, lon)
 
         return location
+
 
 class DescriptionIconsDaily(SevenDayForecast):
     
