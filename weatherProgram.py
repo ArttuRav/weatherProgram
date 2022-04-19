@@ -2,6 +2,7 @@
 # Author: Arttu Ravantti 
 # Description: 
 
+from calendar import week
 import tkinter as tk
 from tkinter.font import BOLD
 import requests
@@ -36,7 +37,8 @@ class WeatherProgram(tk.Tk):
         # Canvas for visuals
         self.canvas_time_date = tk.Canvas(self, bg='gray', height=22, width=125, highlightthickness=1, highlightbackground='black').place(x='12', y='4')
         self.canvas_data = tk.Canvas(self, bg='lightgray', highlightthickness=1, highlightbackground='black', height=400, width=675)
-        # Lines for visuals
+
+        # Lines for visuals on canvas
         self.canvas_data.create_line(260,0,260,401, fill='gray', width=5) # vertical separator
         self.canvas_data.create_line(0,31,677,31, fill='gray', width=5) # horizontal 1
         self.canvas_data.create_line(0,93,677,93, fill='gray', width=5) # horizontal 2
@@ -68,7 +70,7 @@ class WeatherProgram(tk.Tk):
         # Label to store city name
         self.city_name_label = tk.Label(self, text='', font=('calibri', 14), background='gray')
 
-        # Data labels
+        # Data labels current
         self.cur_temp_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.feels_like_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.pressure_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -77,6 +79,77 @@ class WeatherProgram(tk.Tk):
         self.description_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.wind_speed_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+
+        # Data labels daily
+        self.mon_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.mon_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.mon_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.mon_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.mon_temp_min_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.mon_pressure_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.mon_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.mon_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.mon_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Monday
+        
+        self.tue_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.tue_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.tue_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.tue_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.tue_temp_min_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.tue_pressure_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.tue_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.tue_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.tue_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Tuesday
+
+        self.wed_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.wed_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.wed_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.wed_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.wed_temp_min_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.wed_pressure_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.wed_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.wed_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.wed_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Wednesday
+
+        self.thu_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.thu_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.thu_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.thu_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.thu_temp_min_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.thu_pressure_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.thu_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.thu_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.thu_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Thursday
+
+        self.fri_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fri_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fri_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fri_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fri_temp_min_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fri_pressure_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fri_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fri_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fri_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Friday
+
+        self.sat_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sat_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sat_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sat_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sat_temp_min_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sat_pressure_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sat_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sat_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sat_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Saturday
+
+        self.sun_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sun_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sun_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sun_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sun_temp_min_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sun_pressure_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sun_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sun_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sun_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Sunday
 
         # Search bar
         self.search_bar_entry = ttk.Entry(self, width='20', font=('lucida 13'))
@@ -89,8 +162,17 @@ class WeatherProgram(tk.Tk):
         refresh_img_path_full = cwd + refresh_img_path_base
         refresh_icon = ImageTk.PhotoImage(Image.open(refresh_img_path_full))
 
-        # Icon for description
+        # Icon for current description
         self.desc_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+
+        # Icons for daily descriptions
+        self.mon_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.tue_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.wed_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.thu_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.fri_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.sat_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.sun_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
 
         # Search and refresh buttons
         self.search_button = ttk.Button(self, text='Search', command=self.check_input)
@@ -110,7 +192,8 @@ class WeatherProgram(tk.Tk):
 
     # Checking input to show user errors when needed
     def check_input(self):
-        SevenDayForecast.data_of_weekday(self, 2) # Temporary. To Run functions that aren't attached to anything else yet.
+        for i in range(8):
+            print(SevenDayForecast.daily_get_data(self, i))
 
         self.start = timeit.default_timer()
 
@@ -172,7 +255,7 @@ class WeatherProgram(tk.Tk):
                     elif ((list(current_data_dict)[index] == 'windspeed')):
                         return to_rounded + ' m/s'
                     elif ((list(current_data_dict)[index] == 'winddeg')):
-                        return self.get_direction_from_degree(current_data_dict_list[7])
+                        return SevenDayForecast.get_direction_from_degree(self, current_data_dict_list[7])
                     else:
                         return to_rounded
                 else:
@@ -199,17 +282,10 @@ class WeatherProgram(tk.Tk):
 
         return now.strftime('%H:%M')
 
-    # Method name
-    def get_direction_from_degree(self, angle):
-        val = int((angle / 22.5) + 0.5)
-        dir_array = ['N','NNE','NE','ENE','E','ESE', 'SE', 'SSE','S','SSW','SW','WSW','W','WNW','NW','NNW']
-
-        return dir_array[(val % 16)]
-
     # Setting data to labels
     def update_labels(self):
         self.city_name_label.config(text=self.get_city())
-        self.desc_icon_label.config(image=self.get_desc_icons())
+        self.desc_icon_label.config(image=self.get_current_icon())
 
         self.cur_temp_label.config(text=self.get_data(0))
         self.feels_like_label.config(text=self.get_data(1))
@@ -278,7 +354,7 @@ class WeatherProgram(tk.Tk):
         self.wind_speed_label.config(text='')
         self.wind_deg_label.config(text='')
 
-    def get_desc_icons(self):
+    def get_current_icon(self):
         try:
             current_data_dict = CurrentForecast.get_current_forecast(self)
             dict_to_list = list(current_data_dict.values())
@@ -381,11 +457,82 @@ class SevenDayForecast():
         
         return weekday
     
-    # Getting data of given week day number (0-6), starting from Monday
+    # Returning the data of the day corresponding to index
     def data_of_weekday(self, index):
         weekday = SevenDayForecast.weekday_from_timestamp(self, index)
 
-        print(self.daily[weekday])
+        return self.daily[weekday]
+
+    # Test for function to assign data to variables
+    def time_from_timestamp(self, date_timestamp):
+        
+        return datetime.utcfromtimestamp(date_timestamp).strftime('%H:%M')
+
+    # Method name
+    def get_direction_from_degree(self, angle):
+        val = int((angle / 22.5) + 0.5)
+        dir_array = ['N','NNE','NE','ENE','E','ESE', 'SE', 'SSE','S','SSW','SW','WSW','W','WNW','NW','NNW']
+
+        return dir_array[(val % 16)]
+
+    def weekday_description_icon(self, index):
+        weekday_icon_code = DescriptionIconsDaily.daily_get_and_move_icon(self, index)
+        weekday = SevenDayForecast.weekday_from_timestamp(self, index)
+
+        cwd = os.getcwd() + '\\'
+        daily_desc_icon_file = weekday_icon_code + '.png'
+        daily_desc_icon_path = cwd + 'Images\\' + daily_desc_icon_file
+
+        daily_icon_img = Image.open(daily_desc_icon_path)
+        daily_icon_img_resized = daily_icon_img.resize((45, 45), Image.ANTIALIAS)
+        daily_icon_img_final = ImageTk.PhotoImage(daily_icon_img_resized)
+        
+        return daily_icon_img_final
+
+    def daily_get_data(self, index):
+        try:
+            weekday = SevenDayForecast.weekday_from_timestamp(self, index)
+            weekday_data = SevenDayForecast.data_of_weekday(self, index)
+            daily_temp = weekday_data['temp']
+
+            daily_sunrise = SevenDayForecast.time_from_timestamp(self, weekday_data['sunrise'])
+            daily_sunset = SevenDayForecast.time_from_timestamp(self, weekday_data['sunset'])
+            daily_temp_max = daily_temp['max']
+            daily_temp_min = daily_temp['min']
+            daily_pressure = weekday_data['pressure']
+            daily_humidity = weekday_data['humidity']
+            daily_wind_s = weekday_data['wind_speed']
+            daily_wind_deg = SevenDayForecast.get_direction_from_degree(self, weekday_data['wind_deg'])
+
+            daily_data_dict = {'d_sunrise':daily_sunrise, 'd_sunset':daily_sunset, 'd_temp_max':daily_temp_max, \
+                            'd_temp_min':daily_temp_min, 'd_pressure':daily_pressure, 'd_humidity':daily_humidity, \
+                            'd_wind_speed':daily_wind_s, 'd_wind_deg':daily_wind_deg}
+
+            if (weekday == 0):
+                print('monday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                self.mon_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
+            if (weekday == 1):
+                print('tuesday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                self.tue_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
+            if (weekday == 2):
+                print('wednesday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                self.wed_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
+            if (weekday == 3):
+                print('thursday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                self.thu_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
+            if (weekday == 4):
+                print('friday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                self.fri_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
+            if (weekday == 5):
+                print('saturday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                self.sat_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
+            if (weekday == 6):
+                print('sunday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                self.sun_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
+        except AttributeError:
+            pass
+
+        return daily_data_dict
 
 
 class GeoLocation():
@@ -411,22 +558,17 @@ class GeoLocation():
 class DescriptionIconsDaily(SevenDayForecast):
     
     # Function to get icons for an image description of the weather
-    def get_and_move_icon(self):
-        daily_data_placeholder = SevenDayForecast.get_daily_forecast(self)
+    def daily_get_and_move_icon(self, index):
+        daily_data_placeholder = SevenDayForecast.data_of_weekday(self, index)
+        weekday = SevenDayForecast.weekday_from_timestamp(self, index)
 
         icon_base_url = 'http://openweathermap.org/img/wn/'
         cwd = os.getcwd() + '\\'
 
-        daily_icon_list = []
-
-        for i in range(8):
-            var_daily_data = daily_data_placeholder['daily']
-            weather = var_daily_data[i]['weather']
-            icon_code = weather[0]['icon']
-            icon_file_name = icon_code + '.png'
-            icon_complete_url = icon_base_url + icon_code + '@2x.png'
-
-            daily_icon_list.append(icon_code)
+        weather = daily_data_placeholder[weekday]['weather']
+        icon_code = weather[0]['icon']
+        icon_file_name = icon_code + '.png'
+        icon_complete_url = icon_base_url + icon_code + '@2x.png'
 
         urllib.request.urlretrieve(icon_complete_url, icon_file_name)
         
@@ -435,7 +577,7 @@ class DescriptionIconsDaily(SevenDayForecast):
 
         shutil.move(src_path, dest_path) # Moving the file to dest_path
 
-        return daily_icon_list
+        return icon_code
         
 
 
