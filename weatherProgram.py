@@ -445,6 +445,7 @@ class SevenDayForecast():
 
     # Getting an integer corresponding to a day of the week from timestamp format
     def weekday_from_timestamp(self, index):
+        print('index:', index)
         self.daily = SevenDayForecast.get_daily_forecast(self)
 
         timestamp_date = self.daily[index]['dt']
@@ -453,7 +454,10 @@ class SevenDayForecast():
         day = int(datetime.utcfromtimestamp(timestamp_date).strftime('%d'))
             
         date = datetime(year, month, day)
+        print('date from timestamp:', date)
+
         weekday = date.weekday()
+        print('weekday from timestamp:', weekday)
         
         return weekday
     
