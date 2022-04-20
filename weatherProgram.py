@@ -193,6 +193,7 @@ class WeatherProgram(tk.Tk):
     # Checking input to show user errors when needed
     def check_input(self):
         for i in range(8):
+            print('calling index:', i)
             print(SevenDayForecast.daily_get_data(self, i))
 
         self.start = timeit.default_timer()
@@ -445,7 +446,6 @@ class SevenDayForecast():
 
     # Getting an integer corresponding to a day of the week from timestamp format
     def weekday_from_timestamp(self, index):
-        print('index:', index)
         self.daily = SevenDayForecast.get_daily_forecast(self)
 
         timestamp_date = self.daily[index]['dt']
@@ -454,10 +454,8 @@ class SevenDayForecast():
         day = int(datetime.utcfromtimestamp(timestamp_date).strftime('%d'))
             
         date = datetime(year, month, day)
-        print('date from timestamp:', date)
 
         weekday = date.weekday()
-        print('weekday from timestamp:', weekday)
         
         return weekday
     
@@ -512,26 +510,28 @@ class SevenDayForecast():
                             'd_temp_min':daily_temp_min, 'd_pressure':daily_pressure, 'd_humidity':daily_humidity, \
                             'd_wind_speed':daily_wind_s, 'd_wind_deg':daily_wind_deg}
 
+            print('index:', index)
+
             if (weekday == 0):
-                print('monday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                print(weekday, 'monday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
                 self.mon_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
             if (weekday == 1):
-                print('tuesday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                print(weekday, 'tuesday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
                 self.tue_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
             if (weekday == 2):
-                print('wednesday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                print(weekday, 'wednesday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
                 self.wed_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
             if (weekday == 3):
-                print('thursday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                print(weekday, 'thursday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
                 self.thu_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
             if (weekday == 4):
-                print('friday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                print(weekday, 'friday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
                 self.fri_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
             if (weekday == 5):
-                print('saturday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                print(weekday, 'saturday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
                 self.sat_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
             if (weekday == 6):
-                print('sunday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
+                print(weekday, 'sunday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
                 self.sun_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
         except AttributeError:
             pass
