@@ -2,7 +2,6 @@
 # Author: Arttu Ravantti 
 # Description: 
 
-from calendar import week
 import tkinter as tk
 from tkinter.font import BOLD
 import requests
@@ -58,13 +57,13 @@ class WeatherProgram(tk.Tk):
         self.windD_text_label = tk.Label(self, text='WIND DIRECTION', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='350')
 
         # Text labels for day indicator
-        self.day_label_monday = tk.Label(self, text='Mon', font=('calibri', 11, BOLD), background='lightgray').place(x='285', y='102')
-        self.day_label_tuesday = tk.Label(self, text='Tue', font=('calibri', 11, BOLD), background='lightgray').place(x='345', y='102')
-        self.day_label_wednesday = tk.Label(self, text='Wed', font=('calibri', 11, BOLD), background='lightgray').place(x='405', y='102')
-        self.day_label_thursday = tk.Label(self, text='Thu', font=('calibri', 11, BOLD), background='lightgray').place(x='465', y='102')
-        self.day_label_friday = tk.Label(self, text='Fri', font=('calibri', 11, BOLD), background='lightgray').place(x='525', y='102')
-        self.day_label_saturday = tk.Label(self, text='Sat', font=('calibri', 11, BOLD), background='lightgray').place(x='585', y='102')
-        self.day_label_sunday = tk.Label(self, text='Sun', font=('calibri', 11, BOLD), background='lightgray').place(x='645', y='102')
+        self.day_label_first = tk.Label(self, text='1', font=('calibri', 11, BOLD), background='lightgray').place(x='285', y='102')
+        self.day_label_second = tk.Label(self, text='2', font=('calibri', 11, BOLD), background='lightgray').place(x='345', y='102')
+        self.day_label_third = tk.Label(self, text='3', font=('calibri', 11, BOLD), background='lightgray').place(x='405', y='102')
+        self.day_label_fourth = tk.Label(self, text='4', font=('calibri', 11, BOLD), background='lightgray').place(x='465', y='102')
+        self.day_label_fifth = tk.Label(self, text='5', font=('calibri', 11, BOLD), background='lightgray').place(x='525', y='102')
+        self.day_label_sixth = tk.Label(self, text='6', font=('calibri', 11, BOLD), background='lightgray').place(x='585', y='102')
+        self.day_label_seventh = tk.Label(self, text='7', font=('calibri', 11, BOLD), background='lightgray').place(x='645', y='102')
         self.current_day = tk.Label(self, text='Current', font=('calibri', 11, BOLD), background='lightgray').place(x='110', y='102')
 
         # Label to store city name
@@ -213,8 +212,7 @@ class WeatherProgram(tk.Tk):
             self.update_labels()
             self.place_data()
 
-            for i in range(11):
-                print(SevenDayForecast.get_daily_data(self, i))
+            print(SevenDayForecast.get_daily_data(self, 0, 1)) # Used to call functions that aren't attached to GUI yet
 
     # Function for clearing entry when clicked
     def clear_entry_default(self, event):
@@ -383,6 +381,12 @@ class WeatherProgram(tk.Tk):
             print('AttributeError')
             self.place_nothing_to_update_label()
 
+    def weekday_of_daily_data(self, index):
+        placeholder_daily_data = SevenDayForecast.data_of_weekdays(self)
+        one_day_data = list(placeholder_daily_data[index].values())
+
+        return one_day_data[0]
+
 
 class CurrentForecast():
 
@@ -442,7 +446,7 @@ class SevenDayForecast():
         else:
             return False
 
-    # Getting an integer corresponding to a day of the week from timestamp format
+    # Returning the data sorted by date
     def daily_ordered_data(self):
         if (SevenDayForecast.valid_city_daily(self) == True):
             self.daily = self.daily_data['daily']
@@ -465,11 +469,24 @@ class SevenDayForecast():
 
         return ordered_dict
     
-    # week day
-    def data_of_weekday(self):
+    # Method for returning the sorted and separated data
+    def data_of_weekdays(self):
         daily_sorted_data = SevenDayForecast.daily_ordered_data(self)
         list_daily_sorted_data = list(daily_sorted_data.values())
         list_daily_sorted_keys = list(daily_sorted_data)
+
+        # Declaring a dictionary for each day there is data of
+        dict_1st, dict_2nd, dict_3rd, dict_4th, dict_5th, dict_6th, dict_7th, dict_8th = {}, {}, {}, {}, {}, {}, {}, {}
+
+        # Storing the dictionaries in a list to easily move to the next dictionary, when a day's data has been filled
+        dict_list = [dict_1st, dict_2nd, dict_3rd, dict_4th, \
+                    dict_5th, dict_6th, dict_7th, dict_8th]
+
+        dict_index = 0
+
+        # Keys for data values
+        key_list = ['weekday', 'date', 'd_sunrise', 'd_sunset', 'd_temp_max', 'd_temp_min', \
+                    'd_pressure', 'd_humidity', 'd_wind_speed', 'd_wind_deg', 'd_icon']
 
         for i in range(8):
             day_data = list_daily_sorted_data[i]
@@ -486,18 +503,27 @@ class SevenDayForecast():
             daily_wind_deg = SevenDayForecast.get_direction_from_degree(self, day_data['wind_deg'])
             daily_icon = day_weather[0]['icon']
 
-
             date_datetime = list_daily_sorted_keys[i]
             date_final = date_datetime.strftime('%d-%m-%Y')
             weekday = date_datetime.weekday()
 
-        daily_data_dict = {'weekday':weekday, 'date':date_final, 'd_sunrise':daily_sunrise, 'd_sunset':daily_sunset, 'd_temp_max':daily_temp_max, \
-                        'd_temp_min':daily_temp_min, 'd_pressure':daily_pressure, 'd_humidity':daily_humidity, \
-                        'd_wind_speed':daily_wind_s, 'd_wind_deg':daily_wind_deg, 'd_icon':daily_icon}
+            # Values listed, so that they can be iterated over in a for loop
+            value_list = [weekday, date_final, daily_sunrise, daily_sunset, daily_temp_max, \
+                        daily_temp_min, daily_pressure, daily_humidity, daily_wind_s, daily_wind_deg, daily_icon]
 
-        return daily_data_dict
+            value_index = 0
 
-    # Test for function to assign data to variables
+            # This for loop adds the values to the correct dictionaries, paired with matching keys
+            for key in key_list:
+                dict_list[dict_index][key] = value_list[value_index]
+                value_index += 1
+                if (value_index > 10):
+                    dict_index += 1
+                    value_index = 0
+
+        return dict_list
+
+    # Method name
     def time_from_timestamp(self, date_timestamp):
         
         return datetime.utcfromtimestamp(date_timestamp).strftime('%H:%M')
@@ -510,7 +536,7 @@ class SevenDayForecast():
         return dir_array[(val % 16)]
 
     def weekday_description_icon(self, index):
-        placeholder = SevenDayForecast.data_of_weekday(self, index)
+        placeholder = SevenDayForecast.data_of_weekdays(self, index)
         weekday_icon_code = DescriptionIconsDaily.daily_get_and_move_icon(self, index)
 
         cwd = os.getcwd() + '\\'
@@ -523,25 +549,28 @@ class SevenDayForecast():
         
         return daily_icon_img_final
 
-    def get_daily_data(self, index):
+    # When called, index is used for picking the desired value, and day of the value
+    def get_daily_data(self, index, day):
         try:
-            daily_data_dict = SevenDayForecast.data_of_weekday(self)
-            daily_data_dict_list = list(daily_data_dict.values())
+            daily_data_dicts = SevenDayForecast.data_of_weekdays(self)
+            one_day_data = daily_data_dicts[day]
+            print(one_day_data)
+            # daily_data_dict_list = list(daily_data_dicts.values())
 
-            if (daily_data_dict is not None): # Checking that the dictionary exists
-                daily_data_value = list(daily_data_dict.values())[index]
-                if (type(daily_data_value) != str):
+            if (one_day_data is not None): # Checking that the dictionary exists
+                daily_data_value = list(one_day_data.values())[index]
+                if (type(daily_data_value) != str): # Making sure strings don't end up being rounded, since it wouldn't work
                     daily_data_rounded = round((daily_data_value), 2)
                     daily_data_rounded = re.sub('[()]', '', str(daily_data_rounded))
 
                     # Adding units to data outputs
-                    if (((list(daily_data_dict)[index]) == 'd_temp_max') or ((list(daily_data_dict)[index]) == 'd_temp_min')):
+                    if (((list(daily_data_dicts)[index]) == 'd_temp_max') or ((list(daily_data_dicts)[index]) == 'd_temp_min')):
                         return daily_data_rounded + u'\N{DEGREE SIGN}C'
-                    elif ((list(daily_data_dict)[index]) == 'd_pressure'):
+                    elif ((list(daily_data_dicts)[index]) == 'd_pressure'):
                         return daily_data_rounded + ' hPa'
-                    elif ((list(daily_data_dict)[index]) == 'd_humidity'):
+                    elif ((list(daily_data_dicts)[index]) == 'd_humidity'):
                         return daily_data_rounded + ' %'
-                    elif ((list(daily_data_dict)[index]) == 'd_wind_speed'):
+                    elif ((list(daily_data_dicts)[index]) == 'd_wind_speed'):
                         return daily_data_rounded + ' m/s'
                     else:
                         return daily_data_rounded
@@ -575,8 +604,8 @@ class DescriptionIconsDaily(SevenDayForecast):
     
     # Function to get icons for an image description of the weather
     def daily_get_and_move_icon(self, index):
-        daily_data_placeholder = SevenDayForecast.data_of_weekday(self, index)
-        daily_data_list = list(daily_data_placeholder.values())
+        daily_data_dict_placeholder = SevenDayForecast.data_of_weekdays(self, index)
+        daily_data_list = list(daily_data_dict_placeholder.values())
 
         icon_base_url = 'http://openweathermap.org/img/wn/'
         cwd = os.getcwd() + '\\'
