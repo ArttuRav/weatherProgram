@@ -84,7 +84,7 @@ class WeatherProgram(tk.Tk):
         self.mon_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.mon_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.mon_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
-        self.mon_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.mon_temp_max_label = tk.Label(self, background='lightgray', text='-', font=('calibri', 12))
         self.mon_temp_min_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.mon_pressure_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.mon_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -192,10 +192,6 @@ class WeatherProgram(tk.Tk):
 
     # Checking input to show user errors when needed
     def check_input(self):
-        for i in range(8):
-            print('calling index:', i)
-            print(SevenDayForecast.daily_get_data(self, i))
-
         self.start = timeit.default_timer()
 
         self.city_name = self.get_city()
@@ -216,6 +212,8 @@ class WeatherProgram(tk.Tk):
         else:
             self.update_labels()
             self.place_data()
+            for i in range(8):
+                print(SevenDayForecast.weekday_of_data(self, i))
 
     # Function for clearing entry when clicked
     def clear_entry_default(self, event):
@@ -299,11 +297,13 @@ class WeatherProgram(tk.Tk):
 
     # Placing data
     def place_data(self):
+        # Miscellanious labels
         self.city_name_label.place(x='100', y='70')
         self.desc_icon_label.place(x='190', y='139')
         self.description_label.place(x='18', y='162')
-        self.clear_entry_default(self)
+        self.clear_entry_default(self) # Clearing search bar
 
+        # Current data labels
         self.cur_temp_label.place(x='190', y='200')
         self.feels_like_label.place(x='190', y='225')
         self.pressure_label.place(x='190', y='250')
@@ -311,6 +311,9 @@ class WeatherProgram(tk.Tk):
         self.visibility_label.place(x='190', y='300')
         self.wind_speed_label.place(x='190', y='325')
         self.wind_deg_label.place(x='190', y='350')
+
+        # Daily data labels
+        self.mon_temp_max_label.place(x='286', y='140')
 
         # Clearing possible error messages
         self.city_not_found_label.config(text='') 
@@ -422,12 +425,6 @@ class CurrentForecast():
 
 class SevenDayForecast():
 
-    def get_daily_forecast(self):
-        if (SevenDayForecast.valid_city_daily(self) == True):
-            self.daily = self.daily_data['daily']
-
-            return self.daily
-
     def valid_city_daily(self):
         city_coordinates = GeoLocation.get_latitude_longitude(self)
         lat = city_coordinates.lat
@@ -445,25 +442,56 @@ class SevenDayForecast():
             return False
 
     # Getting an integer corresponding to a day of the week from timestamp format
-    def weekday_from_timestamp(self, index):
-        self.daily = SevenDayForecast.get_daily_forecast(self)
+    def daily_ordered_data(self):
+        if (SevenDayForecast.valid_city_daily(self) == True):
+            self.daily = self.daily_data['daily']
 
-        timestamp_date = self.daily[index]['dt']
-        year = int(datetime.utcfromtimestamp(timestamp_date).strftime('%Y'))
-        month = int(datetime.utcfromtimestamp(timestamp_date).strftime('%m'))
-        day = int(datetime.utcfromtimestamp(timestamp_date).strftime('%d'))
+        placeholder_dict = {}
+
+        for i in range(len(self.daily)):
+            weekday_data = self.daily[i]
             
-        date = datetime(year, month, day)
+            timestamp_date = self.daily[i]['dt']
+            year = int(datetime.utcfromtimestamp(timestamp_date).strftime('%Y'))
+            month = int(datetime.utcfromtimestamp(timestamp_date).strftime('%m'))
+            day = int(datetime.utcfromtimestamp(timestamp_date).strftime('%d'))
+            
+            date_datetime = datetime(year, month, day)
 
-        weekday = date.weekday()
+            placeholder_dict[date_datetime] = weekday_data
         
-        return weekday
-    
-    # Returning the data of the day corresponding to index
-    def data_of_weekday(self, index):
-        weekday = SevenDayForecast.weekday_from_timestamp(self, index)
+        ordered_dict = collections.OrderedDict(sorted(placeholder_dict.items(), key=lambda item: item[0]))
 
-        return self.daily[weekday]
+        return ordered_dict
+    
+
+    # week day
+    def weekday_of_data(self, index):
+        daily_sorted_data = SevenDayForecast.daily_ordered_data(self)
+        list_daily_sorted_data = list(daily_sorted_data.values())
+        list_daily_sorted_keys = list(daily_sorted_data)
+
+        day_data = list_daily_sorted_data[index]
+        daily_temp = day_data['temp']
+
+        daily_sunrise = SevenDayForecast.time_from_timestamp(self, day_data['sunrise'])
+        daily_sunset = SevenDayForecast.time_from_timestamp(self, day_data['sunset'])
+        daily_temp_max = daily_temp['max']
+        daily_temp_min = daily_temp['min']
+        daily_pressure = day_data['pressure']
+        daily_humidity = day_data['humidity']
+        daily_wind_s = day_data['wind_speed']
+        daily_wind_deg = SevenDayForecast.get_direction_from_degree(self, day_data['wind_deg'])
+
+        date_datetime = list_daily_sorted_keys[index]
+        date_final = date_datetime.strftime('%d-%m-%Y')
+        weekday = date_datetime.weekday()
+
+        daily_data_dict = {'weekday':weekday, 'date':date_final, 'd_sunrise':daily_sunrise, 'd_sunset':daily_sunset, 'd_temp_max':daily_temp_max, \
+                        'd_temp_min':daily_temp_min, 'd_pressure':daily_pressure, 'd_humidity':daily_humidity, \
+                        'd_wind_speed':daily_wind_s, 'd_wind_deg':daily_wind_deg}
+
+        return daily_data_dict
 
     # Test for function to assign data to variables
     def time_from_timestamp(self, date_timestamp):
@@ -479,7 +507,6 @@ class SevenDayForecast():
 
     def weekday_description_icon(self, index):
         weekday_icon_code = DescriptionIconsDaily.daily_get_and_move_icon(self, index)
-        weekday = SevenDayForecast.weekday_from_timestamp(self, index)
 
         cwd = os.getcwd() + '\\'
         daily_desc_icon_file = weekday_icon_code + '.png'
@@ -490,53 +517,6 @@ class SevenDayForecast():
         daily_icon_img_final = ImageTk.PhotoImage(daily_icon_img_resized)
         
         return daily_icon_img_final
-
-    def daily_get_data(self, index):
-        try:
-            weekday = SevenDayForecast.weekday_from_timestamp(self, index)
-            weekday_data = SevenDayForecast.data_of_weekday(self, index)
-            daily_temp = weekday_data['temp']
-
-            daily_sunrise = SevenDayForecast.time_from_timestamp(self, weekday_data['sunrise'])
-            daily_sunset = SevenDayForecast.time_from_timestamp(self, weekday_data['sunset'])
-            daily_temp_max = daily_temp['max']
-            daily_temp_min = daily_temp['min']
-            daily_pressure = weekday_data['pressure']
-            daily_humidity = weekday_data['humidity']
-            daily_wind_s = weekday_data['wind_speed']
-            daily_wind_deg = SevenDayForecast.get_direction_from_degree(self, weekday_data['wind_deg'])
-
-            daily_data_dict = {'d_sunrise':daily_sunrise, 'd_sunset':daily_sunset, 'd_temp_max':daily_temp_max, \
-                            'd_temp_min':daily_temp_min, 'd_pressure':daily_pressure, 'd_humidity':daily_humidity, \
-                            'd_wind_speed':daily_wind_s, 'd_wind_deg':daily_wind_deg}
-
-            print('index:', index)
-
-            if (weekday == 0):
-                print(weekday, 'monday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
-                self.mon_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
-            if (weekday == 1):
-                print(weekday, 'tuesday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
-                self.tue_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
-            if (weekday == 2):
-                print(weekday, 'wednesday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
-                self.wed_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
-            if (weekday == 3):
-                print(weekday, 'thursday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
-                self.thu_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
-            if (weekday == 4):
-                print(weekday, 'friday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
-                self.fri_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
-            if (weekday == 5):
-                print(weekday, 'saturday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
-                self.sat_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
-            if (weekday == 6):
-                print(weekday, 'sunday', datetime.utcfromtimestamp(weekday_data['dt']).strftime('%d-%m-%Y'))
-                self.sun_icon_label.image(SevenDayForecast.weekday_description_icon(self, index))
-        except AttributeError:
-            pass
-
-        return daily_data_dict
 
 
 class GeoLocation():
@@ -563,8 +543,8 @@ class DescriptionIconsDaily(SevenDayForecast):
     
     # Function to get icons for an image description of the weather
     def daily_get_and_move_icon(self, index):
-        daily_data_placeholder = SevenDayForecast.data_of_weekday(self, index)
-        weekday = SevenDayForecast.weekday_from_timestamp(self, index)
+        daily_data_placeholder = SevenDayForecast.weekday_of_data(self, index)
+        weekday = SevenDayForecast.daily_ordered_data(self, index)
 
         icon_base_url = 'http://openweathermap.org/img/wn/'
         cwd = os.getcwd() + '\\'
