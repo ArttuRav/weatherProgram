@@ -213,7 +213,7 @@ class WeatherProgram(tk.Tk):
             self.update_labels()
             self.place_data()
             for i in range(8):
-                print(SevenDayForecast.weekday_of_data(self, i))
+                print(SevenDayForecast.data_of_weekday(self, i))
 
     # Function for clearing entry when clicked
     def clear_entry_default(self, event):
@@ -466,7 +466,7 @@ class SevenDayForecast():
     
 
     # week day
-    def weekday_of_data(self, index):
+    def data_of_weekday(self, index):
         daily_sorted_data = SevenDayForecast.daily_ordered_data(self)
         list_daily_sorted_data = list(daily_sorted_data.values())
         list_daily_sorted_keys = list(daily_sorted_data)
@@ -543,7 +543,7 @@ class DescriptionIconsDaily(SevenDayForecast):
     
     # Function to get icons for an image description of the weather
     def daily_get_and_move_icon(self, index):
-        daily_data_placeholder = SevenDayForecast.weekday_of_data(self, index)
+        daily_data_placeholder = SevenDayForecast.data_of_weekday(self, index)
         weekday = SevenDayForecast.daily_ordered_data(self, index)
 
         icon_base_url = 'http://openweathermap.org/img/wn/'
