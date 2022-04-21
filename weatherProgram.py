@@ -212,8 +212,9 @@ class WeatherProgram(tk.Tk):
         else:
             self.update_labels()
             self.place_data()
-            for i in range(8):
-                print(SevenDayForecast.data_of_weekday(self, i))
+
+            for i in range(11):
+                print(SevenDayForecast.get_daily_data(self, i))
 
     # Function for clearing entry when clicked
     def clear_entry_default(self, event):
@@ -464,32 +465,35 @@ class SevenDayForecast():
 
         return ordered_dict
     
-
     # week day
-    def data_of_weekday(self, index):
+    def data_of_weekday(self):
         daily_sorted_data = SevenDayForecast.daily_ordered_data(self)
         list_daily_sorted_data = list(daily_sorted_data.values())
         list_daily_sorted_keys = list(daily_sorted_data)
 
-        day_data = list_daily_sorted_data[index]
-        daily_temp = day_data['temp']
+        for i in range(8):
+            day_data = list_daily_sorted_data[i]
+            day_weather = day_data['weather']
+            daily_temp = day_data['temp']
 
-        daily_sunrise = SevenDayForecast.time_from_timestamp(self, day_data['sunrise'])
-        daily_sunset = SevenDayForecast.time_from_timestamp(self, day_data['sunset'])
-        daily_temp_max = daily_temp['max']
-        daily_temp_min = daily_temp['min']
-        daily_pressure = day_data['pressure']
-        daily_humidity = day_data['humidity']
-        daily_wind_s = day_data['wind_speed']
-        daily_wind_deg = SevenDayForecast.get_direction_from_degree(self, day_data['wind_deg'])
+            daily_sunrise = SevenDayForecast.time_from_timestamp(self, day_data['sunrise'])
+            daily_sunset = SevenDayForecast.time_from_timestamp(self, day_data['sunset'])
+            daily_temp_max = daily_temp['max']
+            daily_temp_min = daily_temp['min']
+            daily_pressure = day_data['pressure']
+            daily_humidity = day_data['humidity']
+            daily_wind_s = day_data['wind_speed']
+            daily_wind_deg = SevenDayForecast.get_direction_from_degree(self, day_data['wind_deg'])
+            daily_icon = day_weather[0]['icon']
 
-        date_datetime = list_daily_sorted_keys[index]
-        date_final = date_datetime.strftime('%d-%m-%Y')
-        weekday = date_datetime.weekday()
+
+            date_datetime = list_daily_sorted_keys[i]
+            date_final = date_datetime.strftime('%d-%m-%Y')
+            weekday = date_datetime.weekday()
 
         daily_data_dict = {'weekday':weekday, 'date':date_final, 'd_sunrise':daily_sunrise, 'd_sunset':daily_sunset, 'd_temp_max':daily_temp_max, \
                         'd_temp_min':daily_temp_min, 'd_pressure':daily_pressure, 'd_humidity':daily_humidity, \
-                        'd_wind_speed':daily_wind_s, 'd_wind_deg':daily_wind_deg}
+                        'd_wind_speed':daily_wind_s, 'd_wind_deg':daily_wind_deg, 'd_icon':daily_icon}
 
         return daily_data_dict
 
@@ -506,6 +510,7 @@ class SevenDayForecast():
         return dir_array[(val % 16)]
 
     def weekday_description_icon(self, index):
+        placeholder = SevenDayForecast.data_of_weekday(self, index)
         weekday_icon_code = DescriptionIconsDaily.daily_get_and_move_icon(self, index)
 
         cwd = os.getcwd() + '\\'
@@ -517,6 +522,33 @@ class SevenDayForecast():
         daily_icon_img_final = ImageTk.PhotoImage(daily_icon_img_resized)
         
         return daily_icon_img_final
+
+    def get_daily_data(self, index):
+        try:
+            daily_data_dict = SevenDayForecast.data_of_weekday(self)
+            daily_data_dict_list = list(daily_data_dict.values())
+
+            if (daily_data_dict is not None): # Checking that the dictionary exists
+                daily_data_value = list(daily_data_dict.values())[index]
+                if (type(daily_data_value) != str):
+                    daily_data_rounded = round((daily_data_value), 2)
+                    daily_data_rounded = re.sub('[()]', '', str(daily_data_rounded))
+
+                    # Adding units to data outputs
+                    if (((list(daily_data_dict)[index]) == 'd_temp_max') or ((list(daily_data_dict)[index]) == 'd_temp_min')):
+                        return daily_data_rounded + u'\N{DEGREE SIGN}C'
+                    elif ((list(daily_data_dict)[index]) == 'd_pressure'):
+                        return daily_data_rounded + ' hPa'
+                    elif ((list(daily_data_dict)[index]) == 'd_humidity'):
+                        return daily_data_rounded + ' %'
+                    elif ((list(daily_data_dict)[index]) == 'd_wind_speed'):
+                        return daily_data_rounded + ' m/s'
+                    else:
+                        return daily_data_rounded
+                else:
+                    return daily_data_value
+        except AttributeError:
+            pass
 
 
 class GeoLocation():
@@ -544,13 +576,12 @@ class DescriptionIconsDaily(SevenDayForecast):
     # Function to get icons for an image description of the weather
     def daily_get_and_move_icon(self, index):
         daily_data_placeholder = SevenDayForecast.data_of_weekday(self, index)
-        weekday = SevenDayForecast.daily_ordered_data(self, index)
+        daily_data_list = list(daily_data_placeholder.values())
 
         icon_base_url = 'http://openweathermap.org/img/wn/'
         cwd = os.getcwd() + '\\'
 
-        weather = daily_data_placeholder[weekday]['weather']
-        icon_code = weather[0]['icon']
+        icon_code = daily_data_list[-1]
         icon_file_name = icon_code + '.png'
         icon_complete_url = icon_base_url + icon_code + '@2x.png'
 
