@@ -11,7 +11,6 @@ from PIL import Image, ImageTk
 import re
 import os
 import timeit
-from sympy import true
 import config
 import collections
 import urllib.request
@@ -81,9 +80,9 @@ class WeatherProgram(tk.Tk):
 
         # Data labels daily
         self.mon_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
-        self.mon_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.first_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.mon_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
-        self.mon_temp_max_label = tk.Label(self, background='lightgray', text='-', font=('calibri', 12))
+        self.mon_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.mon_temp_min_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.mon_pressure_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.mon_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -163,6 +162,14 @@ class WeatherProgram(tk.Tk):
 
         # Icon for current description
         self.desc_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+
+        self.day_icon_first = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.day_icon_second = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.day_icon_third = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.day_icon_fourth = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.day_icon_fifth = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.day_icon_sixth = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
+        self.day_icon_seventh = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
 
         # Icons for daily descriptions
         self.mon_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
@@ -294,6 +301,16 @@ class WeatherProgram(tk.Tk):
         self.wind_speed_label.config(text=self.get_data(6))
         self.wind_deg_label.config(text=self.get_data(7))
 
+        self.day_icon_first.config(image=self.get_daily_icons(0))
+        self.day_icon_second.config(image=self.get_daily_icons(1))
+        self.day_icon_third.config(image=self.get_daily_icons(2))
+        self.day_icon_fourth.config(image=self.get_daily_icons(3))
+        self.day_icon_fifth.config(image=self.get_daily_icons(4))
+        self.day_icon_sixth.config(image=self.get_daily_icons(5))
+        self.day_icon_seventh.config(image=self.get_daily_icons(6))
+
+        self.first_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 0))
+
     # Placing data
     def place_data(self):
         # Miscellanious labels
@@ -312,7 +329,16 @@ class WeatherProgram(tk.Tk):
         self.wind_deg_label.place(x='190', y='350')
 
         # Daily data labels
-        self.mon_temp_max_label.place(x='286', y='140')
+        # self.mon_temp_max_label.place(x='286', y='140')
+        # self.first_sunrise_label.place(x='286', y='160')
+
+        self.day_icon_first.place(x='280', y='140')
+        self.day_icon_second.place(x='340', y='140')
+        self.day_icon_third.place(x='400', y='140')
+        self.day_icon_fourth.place(x='460', y='140')
+        self.day_icon_fifth.place(x='520', y='140')
+        self.day_icon_sixth.place(x='580', y='140')
+        self.day_icon_seventh.place(x='640', y='140')
 
         # Clearing possible error messages
         self.city_not_found_label.config(text='') 
@@ -380,6 +406,25 @@ class WeatherProgram(tk.Tk):
         except AttributeError:
             print('AttributeError')
             self.place_nothing_to_update_label()
+
+    def get_daily_icons(self, day):
+        full_daily_data = SevenDayForecast.data_of_weekdays(self)
+        one_day_data = list(full_daily_data[day].values())
+
+        self.icon_label_list = [self.day_icon_first, self.day_icon_second, self.day_icon_third, \
+                        self.day_icon_fourth, self.day_icon_fifth, self.day_icon_sixth, self.day_icon_seventh]
+
+        if (one_day_data is not None):
+            icon_daily_file = one_day_data[-1]
+            dest_path = DescriptionIconsDaily.daily_get_and_move_icon(self, icon_daily_file)
+
+            day_icon_img = Image.open(dest_path)
+            day_icon_img_resized = day_icon_img.resize((45, 45), Image.ANTIALIAS)
+            day_icon_img_final = ImageTk.PhotoImage(day_icon_img_resized)
+            self.icon_label_list[day].image = day_icon_img_final
+
+        return day_icon_img_final
+
 
     def weekday_of_daily_data(self, index):
         placeholder_daily_data = SevenDayForecast.data_of_weekdays(self)
@@ -465,9 +510,9 @@ class SevenDayForecast():
 
             placeholder_dict[date_datetime] = weekday_data
         
-        ordered_dict = collections.OrderedDict(sorted(placeholder_dict.items(), key=lambda item: item[0]))
+        sorted_dict = collections.OrderedDict(sorted(placeholder_dict.items(), key=lambda item: item[0]))
 
-        return ordered_dict
+        return sorted_dict
     
     # Method for returning the sorted and separated data
     def data_of_weekdays(self):
@@ -554,8 +599,6 @@ class SevenDayForecast():
         try:
             daily_data_dicts = SevenDayForecast.data_of_weekdays(self)
             one_day_data = daily_data_dicts[day]
-            print(one_day_data)
-            # daily_data_dict_list = list(daily_data_dicts.values())
 
             if (one_day_data is not None): # Checking that the dictionary exists
                 daily_data_value = list(one_day_data.values())[index]
@@ -603,27 +646,22 @@ class GeoLocation():
 class DescriptionIconsDaily(SevenDayForecast):
     
     # Function to get icons for an image description of the weather
-    def daily_get_and_move_icon(self, index):
-        daily_data_dict_placeholder = SevenDayForecast.data_of_weekdays(self, index)
-        daily_data_list = list(daily_data_dict_placeholder.values())
-
+    def daily_get_and_move_icon(self, icon_daily_code):
         icon_base_url = 'http://openweathermap.org/img/wn/'
         cwd = os.getcwd() + '\\'
 
-        icon_code = daily_data_list[-1]
-        icon_file_name = icon_code + '.png'
-        icon_complete_url = icon_base_url + icon_code + '@2x.png'
+        icon_daily_file = icon_daily_code + '.png'
+        complete_url = icon_base_url + icon_daily_code + '@2x.png'
 
-        urllib.request.urlretrieve(icon_complete_url, icon_file_name)
+        urllib.request.urlretrieve(complete_url, icon_daily_file) # Getting the file
         
-        src_path = cwd + icon_file_name
-        dest_path = cwd + 'Images\\' + icon_file_name
+        src_path = cwd + icon_daily_file
+        dest_path = cwd + 'Images\\' + icon_daily_file
 
         shutil.move(src_path, dest_path) # Moving the file to dest_path
 
-        return icon_code
+        return dest_path
         
-
 
 
 if __name__ == '__main__':
