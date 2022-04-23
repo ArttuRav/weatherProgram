@@ -11,6 +11,7 @@ from PIL import Image, ImageTk
 import re
 import os
 import timeit
+import extra_function
 import config
 import collections
 import urllib.request
@@ -70,7 +71,7 @@ class WeatherProgram(tk.Tk):
         self.day_label_fifth = tk.Label(self, text='5', font=('calibri', 11, BOLD), background='lightgray')
         self.day_label_sixth = tk.Label(self, text='6', font=('calibri', 11, BOLD), background='lightgray')
         self.day_label_seventh = tk.Label(self, text='7', font=('calibri', 11, BOLD), background='lightgray')
-        self.current_day = tk.Label(self, text='Current', font=('calibri', 11, BOLD), background='lightgray').place(x='110', y='102')
+        self.current_day = tk.Label(self, text='Current', font=('calibri', 11, BOLD), background='lightgray').place(x='188', y='102')
 
         # Label to store city name
         self.city_name_label = tk.Label(self, text='', font=('calibri', 14), background='gray')
@@ -86,7 +87,7 @@ class WeatherProgram(tk.Tk):
         self.wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
 
         # Data labels daily
-        self.first_date_label = tk.Label(self, background='gray', text='23/04/2022', font=('calibri', 8))
+        self.first_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.first_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.first_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.first_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -96,7 +97,7 @@ class WeatherProgram(tk.Tk):
         self.first_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.first_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # First slot
         
-        self.second_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.second_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.second_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.second_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.second_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -106,7 +107,7 @@ class WeatherProgram(tk.Tk):
         self.second_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.second_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Second slot
 
-        self.third_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.third_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.third_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.third_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.third_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -116,7 +117,7 @@ class WeatherProgram(tk.Tk):
         self.third_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.third_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Third slot
 
-        self.fourth_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fourth_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.fourth_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.fourth_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.fourth_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -126,7 +127,7 @@ class WeatherProgram(tk.Tk):
         self.fourth_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.fourth_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Fourth slot
 
-        self.fifth_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fifth_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.fifth_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.fifth_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.fifth_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -136,7 +137,7 @@ class WeatherProgram(tk.Tk):
         self.fifth_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.fifth_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Fifth slot
 
-        self.sixth_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sixth_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.sixth_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.sixth_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.sixth_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -146,7 +147,7 @@ class WeatherProgram(tk.Tk):
         self.sixth_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.sixth_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Sixth slot
 
-        self.seventh_date_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.seventh_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.seventh_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.seventh_sunset_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.seventh_temp_max_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -177,15 +178,6 @@ class WeatherProgram(tk.Tk):
         self.day_icon_fifth = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
         self.day_icon_sixth = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
         self.day_icon_seventh = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
-
-        # Icons for daily descriptions
-        self.mon_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
-        self.tue_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
-        self.wed_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
-        self.thu_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
-        self.fri_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
-        self.sat_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
-        self.sun_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
 
         # Search and refresh buttons
         self.search_button = ttk.Button(self, text='Search', command=self.check_input)
@@ -314,7 +306,12 @@ class WeatherProgram(tk.Tk):
         self.wind_speed_label.config(text=self.get_data(6))
         self.wind_deg_label.config(text=self.get_data(7))
 
+        if (config.api_key_index == 1):
+            temp_list = SevenDayForecast.valid_city_daily(self)
+            extra_function.calls_exceeded(temp_list[1])
+
         # Day text labels for 7-day forecast
+        self.day_label_first.config(text=self.weekday_name_order(0))
         self.day_label_first.config(text=self.weekday_name_order(0))
         self.day_label_second.config(text=self.weekday_name_order(1))
         self.day_label_third.config(text=self.weekday_name_order(2))
@@ -332,7 +329,13 @@ class WeatherProgram(tk.Tk):
         self.day_icon_sixth.config(image=self.get_daily_icons(5))
         self.day_icon_seventh.config(image=self.get_daily_icons(6))
 
-        self.first_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 0))
+        self.first_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 0))
+        self.second_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 1))
+        self.third_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 2))
+        self.fourth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 3))
+        self.fifth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 4))
+        self.sixth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 5))
+        self.seventh_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 6))
 
     # Placing data
     def place_data(self):
@@ -352,17 +355,22 @@ class WeatherProgram(tk.Tk):
         self.wind_deg_label.place(x='190', y='350')
 
         # Daily data labels
-        self.first_date_label.place(x='360', y='75')
-        # self.first_sunrise_label.place(x='286', y='160')
+        self.first_date_label.place(x='439', y='75')
+        self.second_date_label.place(x='529', y='75')
+        self.third_date_label.place(x='619', y='75')
+        self.fourth_date_label.place(x='709', y='75')
+        self.fifth_date_label.place(x='799', y='75')
+        self.sixth_date_label.place(x='889', y='75')
+        self.seventh_date_label.place(x='979', y='75')
 
         # 7-day forecast description icons
-        self.day_icon_first.place(x='389.5', y='140')
-        self.day_icon_second.place(x='474', y='140')
-        self.day_icon_third.place(x='558.5', y='140')
-        self.day_icon_fourth.place(x='645', y='140')
-        self.day_icon_fifth.place(x='719', y='140')
-        self.day_icon_sixth.place(x='803.5', y='140')
-        self.day_icon_seventh.place(x='886.5', y='140')
+        self.day_icon_first.place(x='443.25', y='140')
+        self.day_icon_second.place(x='533.25', y='140')
+        self.day_icon_third.place(x='623.25', y='140')
+        self.day_icon_fourth.place(x='713.25', y='140')
+        self.day_icon_fifth.place(x='803.25', y='140')
+        self.day_icon_sixth.place(x='893.25', y='140')
+        self.day_icon_seventh.place(x='983.25', y='140')
 
         # Clearing possible error messages
         self.city_not_found_label.config(text='')
@@ -437,28 +445,35 @@ class WeatherProgram(tk.Tk):
 
     def get_daily_icons(self, day):
         full_daily_data = SevenDayForecast.data_of_weekdays(self)
-        one_day_data = list(full_daily_data[day].values())
+        if (full_daily_data is None):
+            pass
+        else:
+            one_day_data = list(full_daily_data[day].values())
 
-        self.icon_label_list = [self.day_icon_first, self.day_icon_second, self.day_icon_third, \
-                        self.day_icon_fourth, self.day_icon_fifth, self.day_icon_sixth, self.day_icon_seventh]
+            self.icon_label_list = [self.day_icon_first, self.day_icon_second, self.day_icon_third, \
+                                self.day_icon_fourth, self.day_icon_fifth, self.day_icon_sixth, self.day_icon_seventh]
 
-        if (one_day_data is not None):
-            icon_daily_file = one_day_data[-1]
-            dest_path = DescriptionIconsDaily.daily_get_and_move_icon(self, icon_daily_file)
+            if (one_day_data is not None):
+                icon_daily_file = one_day_data[-1]
+                dest_path = DescriptionIconsDaily.daily_get_and_move_icon(self, icon_daily_file)
 
-            day_icon_img = Image.open(dest_path)
-            day_icon_img_resized = day_icon_img.resize((45, 45), Image.ANTIALIAS)
-            day_icon_img_final = ImageTk.PhotoImage(day_icon_img_resized)
-            self.icon_label_list[day].image = day_icon_img_final
+                day_icon_img = Image.open(dest_path)
+                day_icon_img_resized = day_icon_img.resize((45, 45), Image.ANTIALIAS)
+                day_icon_img_final = ImageTk.PhotoImage(day_icon_img_resized)
+                self.icon_label_list[day].image = day_icon_img_final
 
-        return day_icon_img_final
+            return day_icon_img_final
+        
 
     # Calling the method with the day number returns the integer of the weekday (0-6, starting from Monday)
     def weekday_of_daily_data(self, day):
         placeholder_daily_data = SevenDayForecast.data_of_weekdays(self)
-        one_day_data_list = list(placeholder_daily_data[day].values())
+        if (placeholder_daily_data is None):
+            pass
+        else:
+            one_day_data_list = list(placeholder_daily_data[day].values())
 
-        return one_day_data_list[0]
+            return one_day_data_list[0]
 
     def weekday_name_order(self, day):
         data_weekday_int = self.weekday_of_daily_data(day)
@@ -508,7 +523,7 @@ class CurrentForecast():
         current_base_url = 'http://api.openweathermap.org/data/2.5/weather?q='
 
         city = WeatherProgram.get_city(self)
-        current_complete_url = current_base_url + city + '&units=metric' + '&APPID=' + config.api_key
+        current_complete_url = current_base_url + city + '&units=metric' + '&APPID=' + config.api_key_default
         current_response = requests.get(current_complete_url)
         self.current_data = current_response.json()
 
@@ -526,93 +541,131 @@ class SevenDayForecast():
         lat = city_coordinates.lat
         lon = city_coordinates.lon
 
-        onecall_base_url = 'http://api.openweathermap.org/data/2.5/onecall?'
-        dailyCompleteUrl = onecall_base_url + 'lat=' + lat + '&lon=' + lon + '&exclude=current,minutely,hourly,alerts' + '&appid=' + config.api_key
+        if (config.api_key_index == 0):
+            api_key = config.api_key_default
+        else:
+            api_key = config.api_key_backup
 
-        daily_response = requests.get(dailyCompleteUrl)
+        onecall_base_url = 'http://api.openweathermap.org/data/2.5/onecall?'
+        daily_complete_url = onecall_base_url + 'lat=' + lat + '&lon=' + lon + '&exclude=current,minutely,hourly,alerts' + '&appid=' + api_key
+
+        daily_response = requests.get(daily_complete_url)
         self.daily_data = daily_response.json()
 
-        if (self.daily_data['daily'] is not None):
-            return True
-        else:
-            return False
+        try:
+            if (self.daily_data['lat'] is not None):
+                return True
+            else:
+                return False
+        except KeyError:
+            temp_list = [False, daily_complete_url]
+
+            return temp_list
 
     # Returning the data sorted by date
-    def daily_ordered_data(self):
-        if (SevenDayForecast.valid_city_daily(self) == True):
+    def daily_ordered_data(self, complete_url=None):
+        if (type(SevenDayForecast.valid_city_daily(self)) == list):
+            temp_list = SevenDayForecast.valid_city_daily(self)
+            if (temp_list[0] == False):
+                config.api_key_index = 1
+                self.daily = extra_function.calls_exceeded(temp_list[1])
+                
+                if (self.daily['cod'] == 429):
+                    pass
+                else:
+                    placeholder_dict = {}
+
+                    for i in range(len(self.daily)):
+                        weekday_data = self.daily[i]
+            
+                        timestamp_date = self.daily[i]['dt']
+                        year = int(datetime.utcfromtimestamp(timestamp_date).strftime('%Y'))
+                        month = int(datetime.utcfromtimestamp(timestamp_date).strftime('%m'))
+                        day = int(datetime.utcfromtimestamp(timestamp_date).strftime('%d'))
+                        date_datetime = datetime(year, month, day)
+
+                        placeholder_dict[date_datetime] = weekday_data
+        
+                    sorted_dict = collections.OrderedDict(sorted(placeholder_dict.items(), key=lambda item: item[0]))
+
+                    return sorted_dict
+        else:
             self.daily = self.daily_data['daily']
 
-        placeholder_dict = {}
+            placeholder_dict = {}
 
-        for i in range(len(self.daily)):
-            weekday_data = self.daily[i]
+            for i in range(len(self.daily)):
+                weekday_data = self.daily[i]
             
-            timestamp_date = self.daily[i]['dt']
-            year = int(datetime.utcfromtimestamp(timestamp_date).strftime('%Y'))
-            month = int(datetime.utcfromtimestamp(timestamp_date).strftime('%m'))
-            day = int(datetime.utcfromtimestamp(timestamp_date).strftime('%d'))
-            
-            date_datetime = datetime(year, month, day)
+                timestamp_date = self.daily[i]['dt']
+                year = int(datetime.utcfromtimestamp(timestamp_date).strftime('%Y'))
+                month = int(datetime.utcfromtimestamp(timestamp_date).strftime('%m'))
+                day = int(datetime.utcfromtimestamp(timestamp_date).strftime('%d'))
+                date_datetime = datetime(year, month, day)
 
-            placeholder_dict[date_datetime] = weekday_data
+                placeholder_dict[date_datetime] = weekday_data
         
-        sorted_dict = collections.OrderedDict(sorted(placeholder_dict.items(), key=lambda item: item[0]))
+            sorted_dict = collections.OrderedDict(sorted(placeholder_dict.items(), key=lambda item: item[0]))
 
-        return sorted_dict
+            return sorted_dict
+
     
     # Method for returning the sorted and separated data
     def data_of_weekdays(self):
         daily_sorted_data = SevenDayForecast.daily_ordered_data(self)
-        list_daily_sorted_data = list(daily_sorted_data.values())
-        list_daily_sorted_keys = list(daily_sorted_data)
+        if (daily_sorted_data is None):
+            pass
+        else:
+            list_daily_sorted_data = list(daily_sorted_data.values())
+            list_daily_sorted_keys = list(daily_sorted_data)
 
-        # Declaring a dictionary for each day there is data of
-        dict_1st, dict_2nd, dict_3rd, dict_4th, dict_5th, dict_6th, dict_7th, dict_8th = {}, {}, {}, {}, {}, {}, {}, {}
+            # Declaring a dictionary for each day there is data of
+            dict_1st, dict_2nd, dict_3rd, dict_4th, dict_5th, dict_6th, dict_7th, dict_8th = {}, {}, {}, {}, {}, {}, {}, {}
 
-        # Storing the dictionaries in a list to easily move to the next dictionary, when a day's data has been filled
-        dict_list = [dict_1st, dict_2nd, dict_3rd, dict_4th, \
-                    dict_5th, dict_6th, dict_7th, dict_8th]
+            # Storing the dictionaries in a list to easily move to the next dictionary, when a day's data has been filled
+            dict_list = [dict_1st, dict_2nd, dict_3rd, dict_4th, \
+                        dict_5th, dict_6th, dict_7th, dict_8th]
 
-        dict_index = 0
+            dict_index = 0
 
-        # Keys for data values
-        key_list = ['weekday', 'date', 'd_sunrise', 'd_sunset', 'd_temp_max', 'd_temp_min', \
-                    'd_pressure', 'd_humidity', 'd_wind_speed', 'd_wind_deg', 'd_icon']
+            # Keys for data values
+            key_list = ['weekday', 'date', 'd_sunrise', 'd_sunset', 'd_temp_max', 'd_temp_min', \
+                        'd_pressure', 'd_humidity', 'd_wind_speed', 'd_wind_deg', 'd_icon']
 
-        for i in range(8):
-            day_data = list_daily_sorted_data[i]
-            day_weather = day_data['weather']
-            daily_temp = day_data['temp']
+            for i in range(8):
+                day_data = list_daily_sorted_data[i]
+                day_weather = day_data['weather']
+                daily_temp = day_data['temp']
 
-            daily_sunrise = SevenDayForecast.time_from_timestamp(self, day_data['sunrise'])
-            daily_sunset = SevenDayForecast.time_from_timestamp(self, day_data['sunset'])
-            daily_temp_max = daily_temp['max']
-            daily_temp_min = daily_temp['min']
-            daily_pressure = day_data['pressure']
-            daily_humidity = day_data['humidity']
-            daily_wind_s = day_data['wind_speed']
-            daily_wind_deg = SevenDayForecast.get_direction_from_degree(self, day_data['wind_deg'])
-            daily_icon = day_weather[0]['icon']
+                daily_sunrise = SevenDayForecast.time_from_timestamp(self, day_data['sunrise'])
+                daily_sunset = SevenDayForecast.time_from_timestamp(self, day_data['sunset'])
+                daily_temp_max = daily_temp['max']
+                daily_temp_min = daily_temp['min']
+                daily_pressure = day_data['pressure']
+                daily_humidity = day_data['humidity']
+                daily_wind_s = day_data['wind_speed']
+                daily_wind_deg = SevenDayForecast.get_direction_from_degree(self, day_data['wind_deg'])
+                daily_icon = day_weather[0]['icon']
 
-            date_datetime = list_daily_sorted_keys[i]
-            date_final = date_datetime.strftime('%d-%m-%Y')
-            weekday = date_datetime.weekday()
+                date_datetime = list_daily_sorted_keys[i]
+                date_final = date_datetime.strftime('%d.%m.%Y')
+                weekday = date_datetime.weekday()
 
-            # Values listed, so that they can be iterated over in a for loop
-            value_list = [weekday, date_final, daily_sunrise, daily_sunset, daily_temp_max, \
-                        daily_temp_min, daily_pressure, daily_humidity, daily_wind_s, daily_wind_deg, daily_icon]
+                # Values listed, so that they can be iterated over in a for loop
+                value_list = [weekday, date_final, daily_sunrise, daily_sunset, daily_temp_max, \
+                            daily_temp_min, daily_pressure, daily_humidity, daily_wind_s, daily_wind_deg, daily_icon]
 
-            value_index = 0
+                value_index = 0
 
-            # This for loop adds the values to the correct dictionaries, paired with matching keys
-            for key in key_list:
-                dict_list[dict_index][key] = value_list[value_index]
-                value_index += 1
-                if (value_index > 10):
-                    dict_index += 1
-                    value_index = 0
+                # This for loop adds the values to the correct dictionaries, paired with matching keys
+                for key in key_list:
+                    dict_list[dict_index][key] = value_list[value_index]
+                    value_index += 1
+                    if (value_index > 10):
+                        dict_index += 1
+                        value_index = 0
 
-        return dict_list
+            return dict_list
 
     # Method name
     def time_from_timestamp(self, date_timestamp):
@@ -630,27 +683,30 @@ class SevenDayForecast():
     def get_daily_data(self, index, day):
         try:
             daily_data_dicts = SevenDayForecast.data_of_weekdays(self)
-            one_day_data = daily_data_dicts[day]
+            if (daily_data_dicts is None):
+                pass
+            else:
+                one_day_data = daily_data_dicts[day]
 
-            if (one_day_data is not None): # Checking that the dictionary exists
-                daily_data_value = list(one_day_data.values())[index]
-                if (type(daily_data_value) != str): # Making sure strings don't end up being rounded, since it wouldn't work
-                    daily_data_rounded = round((daily_data_value), 2)
-                    daily_data_rounded = re.sub('[()]', '', str(daily_data_rounded))
+                if (one_day_data is not None): # Checking that the dictionary exists
+                    daily_data_value = list(one_day_data.values())[index]
+                    if (type(daily_data_value) != str): # Making sure strings don't end up being rounded, since it wouldn't work
+                        daily_data_rounded = round((daily_data_value), 2)
+                        daily_data_rounded = re.sub('[()]', '', str(daily_data_rounded))
 
-                    # Adding units to data outputs
-                    if (((list(daily_data_dicts)[index]) == 'd_temp_max') or ((list(daily_data_dicts)[index]) == 'd_temp_min')):
-                        return daily_data_rounded + u'\N{DEGREE SIGN}C'
-                    elif ((list(daily_data_dicts)[index]) == 'd_pressure'):
-                        return daily_data_rounded + ' hPa'
-                    elif ((list(daily_data_dicts)[index]) == 'd_humidity'):
-                        return daily_data_rounded + ' %'
-                    elif ((list(daily_data_dicts)[index]) == 'd_wind_speed'):
-                        return daily_data_rounded + ' m/s'
+                        # Adding units to data outputs
+                        if (((list(daily_data_dicts)[index]) == 'd_temp_max') or ((list(daily_data_dicts)[index]) == 'd_temp_min')):
+                            return daily_data_rounded + u'\N{DEGREE SIGN}C'
+                        elif ((list(daily_data_dicts)[index]) == 'd_pressure'):
+                            return daily_data_rounded + ' hPa'
+                        elif ((list(daily_data_dicts)[index]) == 'd_humidity'):
+                            return daily_data_rounded + ' %'
+                        elif ((list(daily_data_dicts)[index]) == 'd_wind_speed'):
+                            return daily_data_rounded + ' m/s'
+                        else:
+                            return daily_data_rounded
                     else:
-                        return daily_data_rounded
-                else:
-                    return daily_data_value
+                        return daily_data_value
         except AttributeError:
             pass
 
@@ -661,7 +717,7 @@ class GeoLocation():
     def get_latitude_longitude(self):
         geo_base_url = 'http://api.openweathermap.org/geo/1.0/direct?q='
         city = WeatherProgram.get_city(self)
-        geo_complete_url = geo_base_url + city + '&APPID=' + config.api_key
+        geo_complete_url = geo_base_url + city + '&APPID=' + config.api_key_default
 
         geo_response = requests.get(geo_complete_url)
         geo_data = geo_response.json()
