@@ -580,20 +580,6 @@ class SevenDayForecast():
 
         return dir_array[(val % 16)]
 
-    def weekday_description_icon(self, index):
-        placeholder = SevenDayForecast.data_of_weekdays(self, index)
-        weekday_icon_code = DescriptionIconsDaily.daily_get_and_move_icon(self, index)
-
-        cwd = os.getcwd() + '\\'
-        daily_desc_icon_file = weekday_icon_code + '.png'
-        daily_desc_icon_path = cwd + 'Images\\' + daily_desc_icon_file
-
-        daily_icon_img = Image.open(daily_desc_icon_path)
-        daily_icon_img_resized = daily_icon_img.resize((45, 45), Image.ANTIALIAS)
-        daily_icon_img_final = ImageTk.PhotoImage(daily_icon_img_resized)
-        
-        return daily_icon_img_final
-
     # When called, index is used for picking the desired value, and day of the value
     def get_daily_data(self, index, day):
         try:
