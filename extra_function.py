@@ -15,8 +15,6 @@ def calls_exceeded(complete_url):
     daily_response = session.get(complete_url)
     daily_data = daily_response.json()
 
-    # print(daily_data)
-
     gateway.shutdown()
 
     return daily_data
