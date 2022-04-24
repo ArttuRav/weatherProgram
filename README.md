@@ -1,1 +1,1 @@
-Current amount of work hours: 71
+Current amount of work hours: 76
