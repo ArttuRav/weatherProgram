@@ -624,16 +624,6 @@ class WeatherProgram(tk.Tk):
         self.city_not_found_label.config(text='City not found')
         self.city_not_found_label.place(x='190', y='5')
 
-    # Placing 'nothing to update' error label
-    def place_nothing_to_update_label(self):
-        print('Error: nothing to update')
-        self.city_not_found_label.config(text='')
-        self.city_not_entered_label.config(text='')
-        self.city_not_found_label.lower() # Lowering other error messages to avoid clipping
-        self.city_not_entered_label.lower()
-        self.nothing_to_update_label.config(text='Nothing to update')
-        self.nothing_to_update_label.place(x='190', y='5')
-
     # Gets the description icon for current forecast
     def get_current_icon(self):
         current_data_dict = CurrentForecast.get_current_forecast(self)
