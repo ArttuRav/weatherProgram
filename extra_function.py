@@ -1,4 +1,5 @@
 import config
+import extra_function_data
 from requests_ip_rotator import ApiGateway
 import requests
 
@@ -11,8 +12,8 @@ def calls_exceeded(complete_url):
     session.mount(gateway_url, gateway)
 
     daily_response = session.get(complete_url)
-    daily_data = daily_response.json()
+    seven_day_data = daily_response.json()
 
     gateway.shutdown()
 
-    return daily_data
+    extra_function_data.daily_data = seven_day_data
