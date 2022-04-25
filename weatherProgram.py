@@ -25,7 +25,7 @@ class WeatherProgram(tk.Tk):
         # Creating window
         self.title('Weather program')
         self.resizable(0, 0)
-        self.geometry('1075x515')
+        self.geometry('1075x506')
         self['bg'] = 'gray'
 
         # Labels for error messages
@@ -35,7 +35,7 @@ class WeatherProgram(tk.Tk):
 
         # Canvas for visuals
         self.canvas_time_date = tk.Canvas(self, bg='gray', height=22, width=125, highlightthickness=1, highlightbackground='black').place(x='12', y='4')
-        self.canvas_data = tk.Canvas(self, bg='lightgray', highlightthickness=1, highlightbackground='black', height=400, width=1052)
+        self.canvas_data = tk.Canvas(self, bg='lightgray', height=394, width=1052, highlightthickness=1, highlightbackground='black')
 
         # Lines for visuals on canvas (numbered left-right and up-down based on their location in the GUI)
         self.canvas_data.create_line(165,0,165,401, fill='gray', width=3) # vertical 1
@@ -84,6 +84,7 @@ class WeatherProgram(tk.Tk):
         self.daily_wind_s_text = tk.Label(self, text='Wind speed', font=('calibri', 11, BOLD), background='lightgray').place(x='280', y='376')
         self.daily_wind_deg_text = tk.Label(self, text='Wind direction', font=('calibri', 11, BOLD), background='lightgray').place(x='280', y='406')
         self.daily_uvi_text = tk.Label(self, text='UV index', font=('calibri', 11, BOLD), background='lightgray').place(x='280', y='436')
+        self.daily_clouds_text = tk.Label(self, text='Clouds', font=('calibri', 11, BOLD), background='lightgray').place(x='280', y='466')
 
         # Text labels for day indicator
         self.day_label_first = tk.Label(self, text='1', font=('calibri', 11, BOLD), background='lightgray')
@@ -97,6 +98,7 @@ class WeatherProgram(tk.Tk):
 
         # Label to store city name
         self.city_name_label = tk.Label(self, text='Location', font=('calibri', 11, BOLD), background='lightgray')
+        self.city_name_daily_label = tk.Label(self, text='Location', font=('calibri', 11, BOLD), background='lightgray')
 
         # Data labels current
         self.cur_temp_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -119,7 +121,8 @@ class WeatherProgram(tk.Tk):
         self.first_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.first_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.first_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) 
-        self.first_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # First slot
+        self.first_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.first_clouds_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # First slot
         
         self.second_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.second_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -130,7 +133,8 @@ class WeatherProgram(tk.Tk):
         self.second_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.second_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.second_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) 
-        self.second_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Second slot
+        self.second_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.second_clouds_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Second slot
 
         self.third_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.third_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -141,7 +145,8 @@ class WeatherProgram(tk.Tk):
         self.third_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.third_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.third_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) 
-        self.third_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Third slot
+        self.third_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.third_clouds_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Third slot
 
         self.fourth_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.fourth_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -152,7 +157,8 @@ class WeatherProgram(tk.Tk):
         self.fourth_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.fourth_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.fourth_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
-        self.fourth_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Fourth slot
+        self.fourth_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fourth_clouds_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Fourth slot
 
         self.fifth_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.fifth_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -163,7 +169,8 @@ class WeatherProgram(tk.Tk):
         self.fifth_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.fifth_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.fifth_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
-        self.fifth_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Fifth slot
+        self.fifth_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.fifth_clouds_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Fifth slot
 
         self.sixth_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.sixth_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -174,7 +181,8 @@ class WeatherProgram(tk.Tk):
         self.sixth_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.sixth_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.sixth_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
-        self.sixth_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Sixth slot
+        self.sixth_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.sixth_clouds_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Sixth slot
 
         self.seventh_date_label = tk.Label(self, background='gray', text='', font=('calibri', 8))
         self.seventh_sunrise_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
@@ -185,7 +193,8 @@ class WeatherProgram(tk.Tk):
         self.seventh_humidity_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.seventh_wind_s_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
         self.seventh_wind_deg_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
-        self.seventh_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Seventh slot
+        self.seventh_uvi_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12))
+        self.seventh_clouds_label = tk.Label(self, background='lightgray', text='', font=('calibri', 12)) # Seventh slot
 
         # Search bar
         self.search_bar_entry = ttk.Entry(self, width='20', font=('lucida 13'))
@@ -222,6 +231,7 @@ class WeatherProgram(tk.Tk):
         self.date_label.place(x='15', y='5')
         self.time_label.place(x='100', y='5')
         self.city_name_label.place(x='18', y='102')
+        self.city_name_daily_label.place(x='280', y='102')
         self.canvas_data.place(x='10', y='100')
         self.day_label_first.place(x='437', y='102')
         self.day_label_second.place(x='527', y='102')
@@ -241,7 +251,7 @@ class WeatherProgram(tk.Tk):
         self.city_name = self.get_city()
 
         # Checking if a city is entered
-        if ((len(self.city_name) == 0) or (self.search_bar_entry.get() == 'Enter a city...')):
+        if ((len(self.city_name) == 0) or (self.search_bar_entry.get() == 'Enter a city...') or (self.search_bar_entry.get() == '')):
             print('Error: no city entered')
             self.place_no_city_entered_label()
             self.clear_data_labels()
@@ -266,8 +276,8 @@ class WeatherProgram(tk.Tk):
         self.city_name = self.search_bar_entry.get()
 
         # Making sure cityName gets a value and using console print to note error
-        if (len(self.search_bar_entry.get()) == 0):
-            self.city_name = self.city_name_label.cget("text")
+        # if (len(self.search_bar_entry.get()) == 0):
+        #     self.city_name = self.city_name_label.cget("text")
 
         return self.city_name.capitalize()
 
@@ -328,132 +338,143 @@ class WeatherProgram(tk.Tk):
 
     # Setting data to labels
     def update_labels(self):
-        self.city_name_label.config(text=self.get_city())
-        self.desc_icon_label.config(image=self.get_current_icon())
+        if (CurrentForecast.valid_city_current(self) == True):
 
-        # Current weather data
-        self.cur_temp_label.config(text=self.get_data(0))
-        self.feels_like_label.config(text=self.get_data(1))
-        self.pressure_label.config(text=self.get_data(2))
-        self.humidity_label.config(text=self.get_data(3))
-        self.visibility_label.config(text=self.get_data(4))
-        self.description_label.config(text=self.get_data(5))
-        self.wind_speed_label.config(text=self.get_data(6))
-        self.wind_deg_label.config(text=self.get_data(7))
-        self.clouds_label.config(text=self.get_data(9))
+            self.city_name_label.config(text=self.get_city())
+            self.city_name_daily_label.config(text=self.city_name_label.cget('text'))
+            self.desc_icon_label.config(image=self.get_current_icon())
 
-        # if (config.api_key_index == 1):
-        #     temp_list = SevenDayForecast.valid_city_daily(self)
-        #     extra_function.calls_exceeded(temp_list[1])
+            # Current weather data
+            self.cur_temp_label.config(text=self.get_data(0))
+            self.feels_like_label.config(text=self.get_data(1))
+            self.pressure_label.config(text=self.get_data(2))
+            self.humidity_label.config(text=self.get_data(3))
+            self.visibility_label.config(text=self.get_data(4))
+            self.description_label.config(text=self.get_data(5))
+            self.wind_speed_label.config(text=self.get_data(6))
+            self.wind_deg_label.config(text=self.get_data(7))
+            self.clouds_label.config(text=self.get_data(9))
 
-        # Day text labels for 7-day forecast
-        self.day_label_first.config(text=self.weekday_name_order(0))
-        self.day_label_first.config(text=self.weekday_name_order(0))
-        self.day_label_second.config(text=self.weekday_name_order(1))
-        self.day_label_third.config(text=self.weekday_name_order(2))
-        self.day_label_fourth.config(text=self.weekday_name_order(3))
-        self.day_label_fifth.config(text=self.weekday_name_order(4))
-        self.day_label_sixth.config(text=self.weekday_name_order(5))
-        self.day_label_seventh.config(text=self.weekday_name_order(6))
+            # Day text labels for 7-day forecast
+            self.day_label_first.config(text=self.weekday_name_order(0))
+            self.day_label_first.config(text=self.weekday_name_order(0))
+            self.day_label_second.config(text=self.weekday_name_order(1))
+            self.day_label_third.config(text=self.weekday_name_order(2))
+            self.day_label_fourth.config(text=self.weekday_name_order(3))
+            self.day_label_fifth.config(text=self.weekday_name_order(4))
+            self.day_label_sixth.config(text=self.weekday_name_order(5))
+            self.day_label_seventh.config(text=self.weekday_name_order(6))
 
-        # Description icons for 7-day forecast
-        self.day_icon_first.config(image=self.get_daily_icons(0))
-        self.day_icon_second.config(image=self.get_daily_icons(1))
-        self.day_icon_third.config(image=self.get_daily_icons(2))
-        self.day_icon_fourth.config(image=self.get_daily_icons(3))
-        self.day_icon_fifth.config(image=self.get_daily_icons(4))
-        self.day_icon_sixth.config(image=self.get_daily_icons(5))
-        self.day_icon_seventh.config(image=self.get_daily_icons(6))
+            # Description icons for 7-day forecast
+            self.day_icon_first.config(image=self.get_daily_icons(0))
+            self.day_icon_second.config(image=self.get_daily_icons(1))
+            self.day_icon_third.config(image=self.get_daily_icons(2))
+            self.day_icon_fourth.config(image=self.get_daily_icons(3))
+            self.day_icon_fifth.config(image=self.get_daily_icons(4))
+            self.day_icon_sixth.config(image=self.get_daily_icons(5))
+            self.day_icon_seventh.config(image=self.get_daily_icons(6))
 
-        # Dates for each day in 7-day forecast
-        self.first_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 0))
-        self.second_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 1))
-        self.third_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 2))
-        self.fourth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 3))
-        self.fifth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 4))
-        self.sixth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 5))
-        self.seventh_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 6))
+            # Dates for each day in 7-day forecast
+            self.first_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 0))
+            self.second_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 1))
+            self.third_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 2))
+            self.fourth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 3))
+            self.fifth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 4))
+            self.sixth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 5))
+            self.seventh_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 6))
 
-        # Max temperature for 7-day forecast
-        self.first_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 0))
-        self.second_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 1))
-        self.third_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 2))
-        self.fourth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 3))
-        self.fifth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 4))
-        self.sixth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 5))
-        self.seventh_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 6))
+            # Max temperature for 7-day forecast
+            self.first_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 0))
+            self.second_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 1))
+            self.third_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 2))
+            self.fourth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 3))
+            self.fifth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 4))
+            self.sixth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 5))
+            self.seventh_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 6))
 
-        # Min temperature for 7-day forecast
-        self.first_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 0))
-        self.second_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 1))
-        self.third_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 2))
-        self.fourth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 3))
-        self.fifth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 4))
-        self.sixth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 5))
-        self.seventh_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 6))
+            # Min temperature for 7-day forecast
+            self.first_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 0))
+            self.second_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 1))
+            self.third_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 2))
+            self.fourth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 3))
+            self.fifth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 4))
+            self.sixth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 5))
+            self.seventh_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 6))
 
-        # Sunrise time for 7-day forecast
-        self.first_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 0))
-        self.second_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 1))
-        self.third_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 2))
-        self.fourth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 3))
-        self.fifth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 4))
-        self.sixth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 5))
-        self.seventh_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 6))
+            # Sunrise time for 7-day forecast
+            self.first_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 0))
+            self.second_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 1))
+            self.third_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 2))
+            self.fourth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 3))
+            self.fifth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 4))
+            self.sixth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 5))
+            self.seventh_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 6))
 
-        # Sunset time for 7-day forecast
-        self.first_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 0))
-        self.second_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 1))
-        self.third_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 2))
-        self.fourth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 3))
-        self.fifth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 4))
-        self.sixth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 5))
-        self.seventh_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 6))
+            # Sunset time for 7-day forecast
+            self.first_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 0))
+            self.second_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 1))
+            self.third_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 2))
+            self.fourth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 3))
+            self.fifth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 4))
+            self.sixth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 5))
+            self.seventh_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 6))
 
-        # Air pressure for 7-day forecast
-        self.first_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 0))
-        self.second_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 1))
-        self.third_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 2))
-        self.fourth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 3))
-        self.fifth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 4))
-        self.sixth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 5))
-        self.seventh_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 6))
+            # Air pressure for 7-day forecast
+            self.first_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 0))
+            self.second_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 1))
+            self.third_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 2))
+            self.fourth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 3))
+            self.fifth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 4))
+            self.sixth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 5))
+            self.seventh_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 6))
 
-        # Humidity for 7-day forecast
-        self.first_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 0))
-        self.second_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 1))
-        self.third_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 2))
-        self.fourth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 3))
-        self.fifth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 4))
-        self.sixth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 5))
-        self.seventh_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 6))
+            # Humidity for 7-day forecast
+            self.first_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 0))
+            self.second_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 1))
+            self.third_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 2))
+            self.fourth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 3))
+            self.fifth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 4))
+            self.sixth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 5))
+            self.seventh_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 6))
 
-        # Wind speed for 7-day forecast
-        self.first_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 0))
-        self.second_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 1))
-        self.third_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 2))
-        self.fourth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 3))
-        self.fifth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 4))
-        self.sixth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 5))
-        self.seventh_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 6))
+            # Wind speed for 7-day forecast
+            self.first_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 0))
+            self.second_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 1))
+            self.third_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 2))
+            self.fourth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 3))
+            self.fifth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 4))
+            self.sixth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 5))
+            self.seventh_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 6))
 
-        # Wind direction for 7-day forecast
-        self.first_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 0))
-        self.second_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 1))
-        self.third_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 2))
-        self.fourth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 3))
-        self.fifth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 4))
-        self.sixth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 5))
-        self.seventh_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 6))
+            # Wind direction for 7-day forecast
+            self.first_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 0))
+            self.second_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 1))
+            self.third_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 2))
+            self.fourth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 3))
+            self.fifth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 4))
+            self.sixth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 5))
+            self.seventh_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 6))
 
-        # UV index for 7-day forecast
-        self.first_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 0))
-        self.second_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 1))
-        self.third_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 2))
-        self.fourth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 3))
-        self.fifth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 4))
-        self.sixth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 5))
-        self.seventh_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 6))
+            # UV index for 7-day forecast
+            self.first_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 0))
+            self.second_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 1))
+            self.third_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 2))
+            self.fourth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 3))
+            self.fifth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 4))
+            self.sixth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 5))
+            self.seventh_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 6))
+
+            # Cloud coverage for 7-day forecast
+            self.first_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 0))
+            self.second_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 1))
+            self.third_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 2))
+            self.fourth_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 3))
+            self.fifth_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 4))
+            self.sixth_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 5))
+            self.seventh_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 6))
+
+        else:
+            self.place_nothing_to_update_label()
 
     # Placing data
     def place_data(self):
@@ -571,6 +592,15 @@ class WeatherProgram(tk.Tk):
         self.sixth_uvi_label.place(x='890', y='436')
         self.seventh_uvi_label.place(x='980', y='436')
 
+        # 7-day forecast cloud coverage data
+        self.first_clouds_label.place(x='440', y='466')
+        self.second_clouds_label.place(x='530', y='466')
+        self.third_clouds_label.place(x='620', y='466')
+        self.fourth_clouds_label.place(x='710', y='466')
+        self.fifth_clouds_label.place(x='800', y='466')
+        self.sixth_clouds_label.place(x='890', y='466')
+        self.seventh_clouds_label.place(x='980', y='466')
+
         # Clearing possible error messages
         self.city_not_found_label.config(text='')
         self.city_not_entered_label.config(text='')
@@ -599,16 +629,18 @@ class WeatherProgram(tk.Tk):
 
     # Placing 'nothing to update' error label
     def place_nothing_to_update_label(self):
+        print('Error: nothing to update')
         self.city_not_found_label.config(text='')
         self.city_not_entered_label.config(text='')
         self.city_not_found_label.lower() # Lowering other error messages to avoid clipping
         self.city_not_entered_label.lower()
-        self.nothing_to_update_label.config(text='nothing to update')
+        self.nothing_to_update_label.config(text='Nothing to update')
         self.nothing_to_update_label.place(x='190', y='5')
 
     # Clearing data labels if city does not exist or one is not entered
     def clear_data_labels(self):
-        self.city_name_label.config(text='')
+        if (self.city_name_label.cget("text") != 'Location'):
+            self.city_name_label.config(text='')
         self.cur_temp_label.config(text='')
         self.feels_like_label.config(text='')
         self.pressure_label.config(text='')
@@ -640,7 +672,6 @@ class WeatherProgram(tk.Tk):
 
                 return desc_icon_img_final
         except AttributeError:
-            print('AttributeError')
             self.place_nothing_to_update_label()
 
     # Gets description icons for 7-day forecast
@@ -834,7 +865,7 @@ class SevenDayForecast():
 
             # Keys for data values
             key_list = ['weekday', 'date', 'd_sunrise', 'd_sunset', 'd_temp_max', 'd_temp_min', \
-                        'd_pressure', 'd_humidity', 'd_wind_speed', 'd_wind_deg', 'd_uvi', 'd_icon']
+                        'd_pressure', 'd_humidity', 'd_wind_speed', 'd_wind_deg', 'd_uvi', 'd_clouds', 'd_icon']
 
             for i in range(len(dict_list)):
                 day_data = list_daily_sorted_data[i]
@@ -850,6 +881,7 @@ class SevenDayForecast():
                 daily_wind_s = day_data['wind_speed']
                 daily_wind_deg = SevenDayForecast.get_direction_from_degree(self, day_data['wind_deg'])
                 daily_uvi = day_data['uvi']
+                daily_clouds = day_data['clouds']
                 daily_icon = day_weather[0]['icon']
 
                 date_datetime = list_daily_sorted_keys[i]
@@ -858,7 +890,7 @@ class SevenDayForecast():
 
                 # Values listed, so that they can be iterated over in a for loop
                 value_list = [weekday, date_final, daily_sunrise, daily_sunset, daily_temp_max, daily_temp_min, \
-                            daily_pressure, daily_humidity, daily_wind_s, daily_wind_deg, daily_uvi, daily_icon]
+                            daily_pressure, daily_humidity, daily_wind_s, daily_wind_deg, daily_uvi, daily_clouds, daily_icon]
 
                 value_index = 0
 
@@ -866,7 +898,7 @@ class SevenDayForecast():
                 for key in key_list:
                     dict_list[dict_index][key] = value_list[value_index]
                     value_index += 1
-                    if (value_index > 11):
+                    if (value_index > 12):
                         dict_index += 1
                         value_index = 0
 
@@ -909,7 +941,7 @@ class SevenDayForecast():
                             return daily_data_rounded + u'\N{DEGREE SIGN}C'
                         elif ((list(one_day_dict)[index]) == 'd_pressure'):
                             return daily_data_rounded + ' hPa'
-                        elif ((list(one_day_dict)[index]) == 'd_humidity'):
+                        elif (((list(one_day_dict)[index]) == 'd_humidity') or ((list(one_day_dict)[index]) == 'd_clouds')):
                             return daily_data_rounded + ' %'
                         elif ((list(one_day_dict)[index]) == 'd_wind_speed'):
                             return daily_data_rounded + ' m/s'
