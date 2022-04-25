@@ -593,8 +593,6 @@ class WeatherProgram(tk.Tk):
         self.sixth_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 5))
         self.seventh_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 6))
 
-        config.idx = 0
-
     # Clearing errors
     def clear_errors(self):
 
