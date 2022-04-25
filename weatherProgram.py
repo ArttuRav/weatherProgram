@@ -1,10 +1,11 @@
 # File name: weatherProgram.py
 # Author: Arttu Ravantti 
-# Description: 
+# Description: A program that retrieves weather data for current, and 7-day forecasts and places them on the GUI.
 
 import collections
 import config
 import extra_function
+import extra_function_data
 import os
 import requests
 import re
@@ -14,10 +15,12 @@ import tkinter as tk
 import urllib.request
 
 from threading import *
+from timezonefinder import TimezoneFinder
 from tkinter import ttk
 from tkinter.font import BOLD
 from datetime import datetime
 from PIL import Image, ImageTk
+from zoneinfo import ZoneInfo
 
 
 class WeatherProgram(tk.Tk):
@@ -28,7 +31,7 @@ class WeatherProgram(tk.Tk):
         # Creating window
         self.title('Weather program')
         self.resizable(0, 0)
-        self.geometry('1075x506')
+        self.geometry('1066x506')
         self['bg'] = 'gray'
 
         # Labels for error messages
@@ -38,7 +41,7 @@ class WeatherProgram(tk.Tk):
 
         # Canvas for visuals
         self.canvas_time_date = tk.Canvas(self, bg='gray', height=22, width=125, highlightthickness=1, highlightbackground='black').place(x='12', y='4')
-        self.canvas_data = tk.Canvas(self, bg='lightgray', height=394, width=1052, highlightthickness=1, highlightbackground='black')
+        self.canvas_data = tk.Canvas(self, bg='lightgray', height=394, width=1044, highlightthickness=1, highlightbackground='black')
 
         # Lines for visuals on canvas (numbered left-right and up-down based on their location in the GUI)
         self.canvas_data.create_line(165,0,165,401, fill='gray', width=3) # vertical 1
@@ -78,6 +81,7 @@ class WeatherProgram(tk.Tk):
         self.clouds_text_label = tk.Label(self, text='Clouds', font=('calibri', 11, BOLD), background='lightgray').place(x='18', y='406')
 
         # Text labels for 7-day data
+        self.daily_description_text_label = tk.Label(self, text='Description', font=('calibri', 11, BOLD), background='lightgray').place(x='280', y='138')
         self.daily_max_temp_text = tk.Label(self, text='Temperature - max', font=('calibri', 11, BOLD), background='lightgray').place(x='280', y='196')
         self.daily_min_temp_text = tk.Label(self, text='Temperature - min', font=('calibri', 11, BOLD), background='lightgray').place(x='280', y='226')
         self.daily_sunrise_text = tk.Label(self, text='Sunrise', font=('calibri', 11, BOLD), background='lightgray').place(x='280', y='256')
@@ -204,12 +208,6 @@ class WeatherProgram(tk.Tk):
         self.search_bar_entry.insert(0, 'Enter a city...') # Adding a default value to be displayed
         self.search_bar_entry.bind('<Button-1>', self.clear_entry_default) # Removing the default value when clicked
 
-        # Icon for updating data
-        cwd = os.getcwd()
-        refresh_img_path_base = "\\Images\\refreshIcon.png"
-        refresh_img_path_full = cwd + refresh_img_path_base
-        refresh_icon = ImageTk.PhotoImage(Image.open(refresh_img_path_full))
-
         # Icon for current description
         self.desc_icon_label = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
 
@@ -224,13 +222,10 @@ class WeatherProgram(tk.Tk):
 
         # Search and refresh buttons
         self.search_button = ttk.Button(self, text='Search', command=self.threading)
-        self.refresh_button = tk.Button(self, image=refresh_icon, background='gray', borderwidth=0, width=20, height=20, command=self.update_labels)
-        self.refresh_button.image = refresh_icon # Creating a reference to the image
 
         # Placements that can't / shouldn't be done while declaring
         self.search_bar_entry.place(x='11', y='40')
         self.search_button.place(x='199', y='40')
-        self.refresh_button.place(x='253', y='73')
         self.date_label.place(x='15', y='5')
         self.time_label.place(x='100', y='5')
         self.city_name_label.place(x='18', y='102')
@@ -244,251 +239,8 @@ class WeatherProgram(tk.Tk):
         self.day_label_sixth.place(x='887', y='102')
         self.day_label_seventh.place(x='977', y='102')
 
-        # Calling an update function to keep time and date updated
-        self.update_date_time()
-
-    # Checking input to show user errors when needed
-    def check_input(self):
-        self.start = timeit.default_timer()
-
-        self.city_name = self.get_city()
-
-        # Checking if a city is entered
-        if ((len(self.city_name) == 0) or (self.search_bar_entry.get() == 'Enter a city...') or (self.search_bar_entry.get() == '')):
-            print('Error: no city entered')
-            self.place_no_city_entered_label()
-            self.clear_data_labels()
-
-        # Checking if the entered city exists in the database
-        elif (CurrentForecast.valid_city_current(self) == False):
-            print('Error: city not found')
-            self.place_city_not_found_label()
-            self.clear_data_labels()
-
-        # Placing data and clearing errors
-        else:
-            self.update_labels()
-            self.place_data()
-
-    # Function for clearing entry when clicked
-    def clear_entry_default(self, event):
-        self.search_bar_entry.delete(0, 'end')
-
-    # Getter for city
-    def get_city(self):
-        self.city_name = self.search_bar_entry.get()
-
-        # Making sure cityName gets a value and using console print to note error
-        # if (len(self.search_bar_entry.get()) == 0):
-        #     self.city_name = self.city_name_label.cget("text")
-
-        return self.city_name.capitalize()
-
-    # Getter for data
-    def get_data(self, index):
-        try:
-            current_data_dict = CurrentForecast.get_current_forecast(self)
-            current_data_dict_list = list(current_data_dict.values())
-
-            # Checking that the dictionary exists
-            if (current_data_dict is not None):
-                data_value = list(current_data_dict.values())[index]
-
-                # Checking type of value to only round values that are numbers
-                if (type(data_value) == int) or (type(data_value) == float):
-                    to_rounded = round((data_value), 2)
-                    to_rounded = re.sub('[()]', '', str(to_rounded))
-
-                    # Adding approriate units to data output
-                    if (((list(current_data_dict)[index]) == 'temp') or ((list(current_data_dict)[index]) == 'ftemp')):
-                        rounded_celcius = to_rounded + u'\N{DEGREE SIGN}C'
-                        return rounded_celcius
-                    elif ((list(current_data_dict)[index]) == 'pressure'):
-                        return to_rounded + ' hPa'
-                    elif ((list(current_data_dict)[index]) == 'humidity') or ((list(current_data_dict)[index]) == 'cur_clouds'):
-                        return to_rounded + ' %'
-                    elif ((list(current_data_dict)[index]) == 'visibility'):
-                        return to_rounded + ' m'
-                    elif ((list(current_data_dict)[index] == 'windspeed')):
-                        return to_rounded + ' m/s'
-                    elif ((list(current_data_dict)[index] == 'winddeg')):
-                        return SevenDayForecast.get_direction_from_degree(self, current_data_dict_list[7])
-                    else:
-                        return to_rounded
-                else:
-                    return data_value
-        except AttributeError:
-            pass
-
-    # Updating date and time
-    def update_date_time(self):
-        self.time_label.config(text=self.get_time())
-        self.date_label.config(text=self.get_date())
-
-        self.after(1000, self.update_date_time)
-
-    # Method name
-    def get_date(self):
-        now = datetime.now()
-
-        return now.strftime('%B %d')
-
-    # Method name
-    def get_time(self):
-        now = datetime.now()
-
-        return now.strftime('%H:%M')
-
-    def threading(self):
-        self.thread1 = Thread(target=self.check_input)
-        self.thread1.start()
-
-    # Setting data to labels
-    def update_labels(self):
-        if (CurrentForecast.valid_city_current(self) == True):
-
-            self.city_name_label.config(text=self.get_city())
-            self.city_name_daily_label.config(text=self.city_name_label.cget('text'))
-            self.desc_icon_label.config(image=self.get_current_icon())
-
-            # Current weather data
-            self.cur_temp_label.config(text=self.get_data(0))
-            self.feels_like_label.config(text=self.get_data(1))
-            self.pressure_label.config(text=self.get_data(2))
-            self.humidity_label.config(text=self.get_data(3))
-            self.visibility_label.config(text=self.get_data(4))
-            self.description_label.config(text=self.get_data(5))
-            self.wind_speed_label.config(text=self.get_data(6))
-            self.wind_deg_label.config(text=self.get_data(7))
-            self.clouds_label.config(text=self.get_data(9))
-
-            # Day text labels for 7-day forecast
-            self.day_label_first.config(text=self.weekday_name_order(0))
-            self.day_label_first.config(text=self.weekday_name_order(0))
-            self.day_label_second.config(text=self.weekday_name_order(1))
-            self.day_label_third.config(text=self.weekday_name_order(2))
-            self.day_label_fourth.config(text=self.weekday_name_order(3))
-            self.day_label_fifth.config(text=self.weekday_name_order(4))
-            self.day_label_sixth.config(text=self.weekday_name_order(5))
-            self.day_label_seventh.config(text=self.weekday_name_order(6))
-
-            # Description icons for 7-day forecast
-            self.day_icon_first.config(image=self.get_daily_icons(0))
-            self.day_icon_second.config(image=self.get_daily_icons(1))
-            self.day_icon_third.config(image=self.get_daily_icons(2))
-            self.day_icon_fourth.config(image=self.get_daily_icons(3))
-            self.day_icon_fifth.config(image=self.get_daily_icons(4))
-            self.day_icon_sixth.config(image=self.get_daily_icons(5))
-            self.day_icon_seventh.config(image=self.get_daily_icons(6))
-
-            # Dates for each day in 7-day forecast
-            self.first_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 0))
-            self.second_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 1))
-            self.third_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 2))
-            self.fourth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 3))
-            self.fifth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 4))
-            self.sixth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 5))
-            self.seventh_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 6))
-
-            # Max temperature for 7-day forecast
-            self.first_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 0))
-            self.second_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 1))
-            self.third_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 2))
-            self.fourth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 3))
-            self.fifth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 4))
-            self.sixth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 5))
-            self.seventh_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 6))
-
-            # Min temperature for 7-day forecast
-            self.first_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 0))
-            self.second_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 1))
-            self.third_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 2))
-            self.fourth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 3))
-            self.fifth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 4))
-            self.sixth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 5))
-            self.seventh_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 6))
-
-            # Sunrise time for 7-day forecast
-            self.first_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 0))
-            self.second_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 1))
-            self.third_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 2))
-            self.fourth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 3))
-            self.fifth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 4))
-            self.sixth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 5))
-            self.seventh_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 6))
-
-            # Sunset time for 7-day forecast
-            self.first_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 0))
-            self.second_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 1))
-            self.third_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 2))
-            self.fourth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 3))
-            self.fifth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 4))
-            self.sixth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 5))
-            self.seventh_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 6))
-
-            # Air pressure for 7-day forecast
-            self.first_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 0))
-            self.second_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 1))
-            self.third_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 2))
-            self.fourth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 3))
-            self.fifth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 4))
-            self.sixth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 5))
-            self.seventh_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 6))
-
-            # Humidity for 7-day forecast
-            self.first_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 0))
-            self.second_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 1))
-            self.third_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 2))
-            self.fourth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 3))
-            self.fifth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 4))
-            self.sixth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 5))
-            self.seventh_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 6))
-
-            # Wind speed for 7-day forecast
-            self.first_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 0))
-            self.second_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 1))
-            self.third_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 2))
-            self.fourth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 3))
-            self.fifth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 4))
-            self.sixth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 5))
-            self.seventh_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 6))
-
-            # Wind direction for 7-day forecast
-            self.first_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 0))
-            self.second_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 1))
-            self.third_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 2))
-            self.fourth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 3))
-            self.fifth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 4))
-            self.sixth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 5))
-            self.seventh_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 6))
-
-            # UV index for 7-day forecast
-            self.first_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 0))
-            self.second_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 1))
-            self.third_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 2))
-            self.fourth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 3))
-            self.fifth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 4))
-            self.sixth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 5))
-            self.seventh_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 6))
-
-            # Cloud coverage for 7-day forecast
-            self.first_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 0))
-            self.second_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 1))
-            self.third_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 2))
-            self.fourth_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 3))
-            self.fifth_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 4))
-            self.sixth_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 5))
-            self.seventh_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 6))
-
-        else:
-            self.place_nothing_to_update_label()
-
-    # Placing data
-    def place_data(self):
-        # Miscellanious labels
         self.desc_icon_label.place(x='190', y='139')
         self.description_label.place(x='18', y='162')
-        self.clear_entry_default(self) # Clearing search bar
 
         # Current data labels
         self.cur_temp_label.place(x='190', y='196')
@@ -608,6 +360,246 @@ class WeatherProgram(tk.Tk):
         self.sixth_clouds_label.place(x='890', y='466')
         self.seventh_clouds_label.place(x='980', y='466')
 
+        # Calling an update function to keep time and date updated
+        self.update_date_time()
+
+    # Checking input to show user errors when needed
+    def check_input(self):
+        self.start = timeit.default_timer()
+
+        self.city_name = self.get_city()
+
+        # Checking if a city is entered
+        if ((len(self.city_name) == 0) or (self.search_bar_entry.get() == 'Enter a city...') or (self.search_bar_entry.get() == '')):
+            print('Error: no city entered')
+            self.place_no_city_entered_label()
+
+        # Checking if the entered city exists in the database
+        elif (CurrentForecast.valid_city_current(self) == False):
+            print('Error: city not found')
+            self.place_city_not_found_label()
+
+        # Placing data and clearing errors
+        else:
+            self.update_labels()
+            self.clear_errors()
+
+    # Function for clearing entry when clicked
+    def clear_entry_default(self, event):
+        self.search_bar_entry.delete(0, 'end')
+
+    # Getter for city
+    def get_city(self):
+        self.city_name = self.search_bar_entry.get()
+        config.city_name = self.city_name
+        
+        if (self.search_bar_entry.get() == ''):
+            self.city_name = config.city_name
+
+        return self.city_name.capitalize()
+
+    # Getter for data
+    def get_data(self, index):
+        try:
+            current_data_dict = CurrentForecast.get_current_forecast(self)
+            current_data_dict_list = list(current_data_dict.values())
+
+            # Checking that the dictionary exists
+            if (current_data_dict is not None):
+                data_value = list(current_data_dict.values())[index]
+
+                # Checking type of value to only round values that are numbers
+                if (type(data_value) == int) or (type(data_value) == float):
+                    to_rounded = round((data_value), 2)
+                    to_rounded = re.sub('[()]', '', str(to_rounded))
+
+                    # Adding approriate units to data output
+                    if (((list(current_data_dict)[index]) == 'temp') or ((list(current_data_dict)[index]) == 'ftemp')):
+                        rounded_celcius = to_rounded + u'\N{DEGREE SIGN}C'
+                        return rounded_celcius
+                    elif ((list(current_data_dict)[index]) == 'pressure'):
+                        return to_rounded + ' hPa'
+                    elif ((list(current_data_dict)[index]) == 'humidity') or ((list(current_data_dict)[index]) == 'cur_clouds'):
+                        return to_rounded + ' %'
+                    elif ((list(current_data_dict)[index]) == 'visibility'):
+                        return to_rounded + ' m'
+                    elif ((list(current_data_dict)[index] == 'windspeed')):
+                        return to_rounded + ' m/s'
+                    elif ((list(current_data_dict)[index] == 'winddeg')):
+                        return SevenDayForecast.get_direction_from_degree(self, current_data_dict_list[7])
+                    else:
+                        return to_rounded
+                else:
+                    return data_value
+        except AttributeError:
+            pass
+
+    # Updating date and time
+    def update_date_time(self):
+        self.time_label.config(text=self.get_time())
+        self.date_label.config(text=self.get_date())
+
+        self.after(1000, self.update_date_time)
+
+    # Method name
+    def get_date(self):
+        now = datetime.now()
+
+        return now.strftime('%B %d')
+
+    # Method name
+    def get_time(self):
+        now = datetime.now()
+
+        return now.strftime('%H:%M')
+
+    def threading(self):
+        self.thread1 = Thread(target=self.check_input)
+        self.thread1.start()
+
+    # Setting data to labels
+    def update_labels(self):
+        # Miscellanious
+        self.city_name_label.config(text=self.get_city())
+        self.city_name_daily_label.config(text=self.city_name_label.cget('text'))
+        self.description_label.config(text=self.get_data(5))
+        self.desc_icon_label.config(image=self.get_current_icon())
+
+        # Current weather data
+        self.cur_temp_label.config(text=self.get_data(0))
+        self.feels_like_label.config(text=self.get_data(1))
+        self.pressure_label.config(text=self.get_data(2))
+        self.humidity_label.config(text=self.get_data(3))
+        self.visibility_label.config(text=self.get_data(4))
+        self.wind_speed_label.config(text=self.get_data(6))
+        self.wind_deg_label.config(text=self.get_data(7))
+        self.clouds_label.config(text=self.get_data(9))
+
+        # Day text labels for 7-day forecast
+        self.day_label_first.config(text=self.weekday_name_order(0))
+        self.day_label_first.config(text=self.weekday_name_order(0))
+        self.day_label_second.config(text=self.weekday_name_order(1))
+        self.day_label_third.config(text=self.weekday_name_order(2))
+        self.day_label_fourth.config(text=self.weekday_name_order(3))
+        self.day_label_fifth.config(text=self.weekday_name_order(4))
+        self.day_label_sixth.config(text=self.weekday_name_order(5))
+        self.day_label_seventh.config(text=self.weekday_name_order(6))
+
+        # Description icons for 7-day forecast
+        self.day_icon_first.config(image=self.get_daily_icons(0))
+        self.day_icon_second.config(image=self.get_daily_icons(1))
+        self.day_icon_third.config(image=self.get_daily_icons(2))
+        self.day_icon_fourth.config(image=self.get_daily_icons(3))
+        self.day_icon_fifth.config(image=self.get_daily_icons(4))
+        self.day_icon_sixth.config(image=self.get_daily_icons(5))
+        self.day_icon_seventh.config(image=self.get_daily_icons(6))
+
+        # Dates for each day in 7-day forecast
+        self.first_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 0))
+        self.second_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 1))
+        self.third_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 2))
+        self.fourth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 3))
+        self.fifth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 4))
+        self.sixth_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 5))
+        self.seventh_date_label.config(text=SevenDayForecast.get_daily_data(self, 1, 6))
+
+        # Max temperature for 7-day forecast
+        self.first_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 0))
+        self.second_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 1))
+        self.third_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 2))
+        self.fourth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 3))
+        self.fifth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 4))
+        self.sixth_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 5))
+        self.seventh_temp_max_label.config(text=SevenDayForecast.get_daily_data(self, 4, 6))
+
+        # Min temperature for 7-day forecast
+        self.first_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 0))
+        self.second_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 1))
+        self.third_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 2))
+        self.fourth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 3))
+        self.fifth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 4))
+        self.sixth_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 5))
+        self.seventh_temp_min_label.config(text=SevenDayForecast.get_daily_data(self, 5, 6))
+
+        # Sunrise time for 7-day forecast
+        self.first_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 0))
+        self.second_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 1))
+        self.third_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 2))
+        self.fourth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 3))
+        self.fifth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 4))
+        self.sixth_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 5))
+        self.seventh_sunrise_label.config(text=SevenDayForecast.get_daily_data(self, 2, 6))
+
+        # Sunset time for 7-day forecast
+        self.first_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 0))
+        self.second_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 1))
+        self.third_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 2))
+        self.fourth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 3))
+        self.fifth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 4))
+        self.sixth_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 5))
+        self.seventh_sunset_label.config(text=SevenDayForecast.get_daily_data(self, 3, 6))
+
+        # Air pressure for 7-day forecast
+        self.first_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 0))
+        self.second_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 1))
+        self.third_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 2))
+        self.fourth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 3))
+        self.fifth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 4))
+        self.sixth_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 5))
+        self.seventh_pressure_label.config(text=SevenDayForecast.get_daily_data(self, 6, 6))
+
+        # Humidity for 7-day forecast
+        self.first_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 0))
+        self.second_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 1))
+        self.third_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 2))
+        self.fourth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 3))
+        self.fifth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 4))
+        self.sixth_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 5))
+        self.seventh_humidity_label.config(text=SevenDayForecast.get_daily_data(self, 7, 6))
+
+        # Wind speed for 7-day forecast
+        self.first_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 0))
+        self.second_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 1))
+        self.third_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 2))
+        self.fourth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 3))
+        self.fifth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 4))
+        self.sixth_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 5))
+        self.seventh_wind_s_label.config(text=SevenDayForecast.get_daily_data(self, 8, 6))
+
+        # Wind direction for 7-day forecast
+        self.first_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 0))
+        self.second_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 1))
+        self.third_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 2))
+        self.fourth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 3))
+        self.fifth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 4))
+        self.sixth_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 5))
+        self.seventh_wind_deg_label.config(text=SevenDayForecast.get_daily_data(self, 9, 6))
+
+        # UV index for 7-day forecast
+        self.first_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 0))
+        self.second_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 1))
+        self.third_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 2))
+        self.fourth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 3))
+        self.fifth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 4))
+        self.sixth_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 5))
+        self.seventh_uvi_label.config(text=SevenDayForecast.get_daily_data(self, 10, 6))
+
+        # Cloud coverage for 7-day forecast
+        self.first_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 0))
+        self.second_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 1))
+        self.third_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 2))
+        self.fourth_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 3))
+        self.fifth_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 4))
+        self.sixth_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 5))
+        self.seventh_clouds_label.config(text=SevenDayForecast.get_daily_data(self, 11, 6))
+
+        config.idx = 0
+
+    # Clearing errors
+    def clear_errors(self):
+
+        self.clear_entry_default(self) # Clearing search bar
+
         # Clearing possible error messages
         self.city_not_found_label.config(text='')
         self.city_not_entered_label.config(text='')
@@ -644,42 +636,26 @@ class WeatherProgram(tk.Tk):
         self.nothing_to_update_label.config(text='Nothing to update')
         self.nothing_to_update_label.place(x='190', y='5')
 
-    # Clearing data labels if city does not exist or one is not entered
-    def clear_data_labels(self):
-        if (self.city_name_label.cget("text") != 'Location'):
-            self.city_name_label.config(text='')
-        self.cur_temp_label.config(text='')
-        self.feels_like_label.config(text='')
-        self.pressure_label.config(text='')
-        self.humidity_label.config(text='')
-        self.visibility_label.config(text='')
-        self.description_label.config(text='')
-        self.wind_speed_label.config(text='')
-        self.wind_deg_label.config(text='')
-
     # Gets the description icon for current forecast
     def get_current_icon(self):
-        try:
-            current_data_dict = CurrentForecast.get_current_forecast(self)
-            dict_to_list = list(current_data_dict.values())
+        current_data_dict = CurrentForecast.get_current_forecast(self)
+        dict_to_list = list(current_data_dict.values())
 
-            if (dict_to_list[8] is not None):
-                cwd = os.getcwd() + '\\'
-                current_desc_icon_file = dict_to_list[8] + '.png'
-                src_path = cwd + current_desc_icon_file
-                dest_path = cwd + 'Images\\' + current_desc_icon_file
-                final_icon_url = 'http://openweathermap.org/img/wn/' + dict_to_list[8] + '@2x.png'
-                urllib.request.urlretrieve(final_icon_url, current_desc_icon_file)
-                shutil.move(src_path, dest_path)
+        if (dict_to_list[8] is not None):
+            cwd = os.getcwd() + '\\'
+            current_desc_icon_file = dict_to_list[8] + '.png'
+            src_path = cwd + current_desc_icon_file
+            dest_path = cwd + 'Images\\' + current_desc_icon_file
+            final_icon_url = 'http://openweathermap.org/img/wn/' + dict_to_list[8] + '@2x.png'
+            urllib.request.urlretrieve(final_icon_url, current_desc_icon_file)
+            shutil.move(src_path, dest_path)
 
-                desc_icon_img = Image.open(dest_path)
-                desc_icon_img_resized = desc_icon_img.resize((45, 45))
-                desc_icon_img_final = ImageTk.PhotoImage(desc_icon_img_resized)
-                self.desc_icon_label.image = desc_icon_img_final
+            desc_icon_img = Image.open(dest_path)
+            desc_icon_img_resized = desc_icon_img.resize((45, 45))
+            desc_icon_img_final = ImageTk.PhotoImage(desc_icon_img_resized)
+            self.desc_icon_label.image = desc_icon_img_final
 
-                return desc_icon_img_final
-        except AttributeError:
-            self.place_nothing_to_update_label()
+            return desc_icon_img_final
 
     # Gets description icons for 7-day forecast
     def get_daily_icons(self, day):
@@ -702,7 +678,6 @@ class WeatherProgram(tk.Tk):
                 self.icon_label_list[day].image = day_icon_img_final
 
             return day_icon_img_final
-        
 
     # Calling the method with the day number returns the integer of the weekday (0-6, starting from Monday)
     def weekday_of_daily_data(self, day):
@@ -764,7 +739,7 @@ class CurrentForecast():
     def valid_city_current(self):
         current_base_url = 'http://api.openweathermap.org/data/2.5/weather?q='
 
-        city = WeatherProgram.get_city(self)
+        city = config.city_name
         current_complete_url = current_base_url + city + '&units=metric' + '&APPID=' + config.api_key_default
         current_response = requests.get(current_complete_url)
         self.current_data = current_response.json()
@@ -793,6 +768,8 @@ class SevenDayForecast():
         daily_complete_url = onecall_base_url + 'lat=' + lat + '&lon=' + lon + \
                         '&units=metric' + '&exclude=current,minutely,hourly,alerts' + '&appid=' + api_key
 
+        extra_function_data.complete_url_daily = daily_complete_url
+
         daily_response = requests.get(daily_complete_url)
         self.daily_data = daily_response.json()
 
@@ -800,9 +777,10 @@ class SevenDayForecast():
             if (self.daily_data['lat'] is not None):
                 return True
         except KeyError:
-            temp_list = [False, daily_complete_url]
+            config.api_key_index = 1
+            SevenDayForecast.valid_city_daily(self)
 
-            return temp_list
+            return False
 
     # Returning the data sorted by date
     def daily_ordered_data(self, complete_url=None):
@@ -913,8 +891,21 @@ class SevenDayForecast():
 
     # Method name
     def time_from_timestamp(self, date_timestamp):
+        timezone_text = SevenDayForecast.get_timezone(self)
+        in_local_time = datetime.fromtimestamp(date_timestamp)
         
-        return datetime.fromtimestamp(date_timestamp).strftime('%H:%M')
+        return in_local_time.astimezone(ZoneInfo(timezone_text)).strftime('%H:%M')
+        # return datetime.fromtimestamp(date_timestamp).strftime('%H:%M')
+
+    # Method name
+    def get_timezone(self):
+        timezonefinder = TimezoneFinder()
+
+        location = GeoLocation.get_latitude_longitude(self)
+        lat = float(location.lat)
+        lon = float(location.lon)
+
+        return timezonefinder.timezone_at(lng=lon, lat=lat)
 
     # Method name
     def get_direction_from_degree(self, angle):
@@ -935,7 +926,6 @@ class SevenDayForecast():
                 # Checking that the dictionary exists
                 if (one_day_data is not None):
                     daily_data_value = list(one_day_data.values())[index]
-                    print(daily_data_value)
 
                     # Making sure strings don't end up rounded
                     if (type(daily_data_value) == int) or (type(daily_data_value) == float):
