@@ -2,20 +2,23 @@
 # Author: Arttu Ravantti 
 # Description: 
 
-import tkinter as tk
-from tkinter.font import BOLD
+import collections
+import config
+import extra_function
+import os
 import requests
+import re
+import shutil
+import timeit
+import tkinter as tk
+import urllib.request
+
+from threading import *
 from tkinter import ttk
+from tkinter.font import BOLD
 from datetime import datetime
 from PIL import Image, ImageTk
-import re
-import os
-import timeit
-import extra_function
-import config
-import collections
-import urllib.request
-import shutil
+
 
 class WeatherProgram(tk.Tk):
 
@@ -220,7 +223,7 @@ class WeatherProgram(tk.Tk):
         self.day_icon_seventh = tk.Label(self, image='', background='lightgray', borderwidth=1, relief='solid')
 
         # Search and refresh buttons
-        self.search_button = ttk.Button(self, text='Search', command=self.check_input)
+        self.search_button = ttk.Button(self, text='Search', command=self.threading)
         self.refresh_button = tk.Button(self, image=refresh_icon, background='gray', borderwidth=0, width=20, height=20, command=self.update_labels)
         self.refresh_button.image = refresh_icon # Creating a reference to the image
 
@@ -335,6 +338,10 @@ class WeatherProgram(tk.Tk):
         now = datetime.now()
 
         return now.strftime('%H:%M')
+
+    def threading(self):
+        self.thread1 = Thread(target=self.check_input)
+        self.thread1.start()
 
     # Setting data to labels
     def update_labels(self):
